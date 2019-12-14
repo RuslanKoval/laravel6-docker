@@ -23,7 +23,7 @@ class PostController extends BaseController
     {
         $items = $this->blogPostRepository->getAllWithPaginate(10);
 
-        return view('blog.posts.index', compact('items'));
+        return $items;
     }
 
     /**

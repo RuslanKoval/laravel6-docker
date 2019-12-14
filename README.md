@@ -9,6 +9,14 @@
 
 docker-compose exec php bash
 
+Почистить кеш
+```
+php artisan cache:clear
+php artisan route:clear
+php artisan config:clear 
+php artisan view:clear 
+```
+
 Создаем модель + миграцию
 ```
 php artisan make:model Models/BlogCategory -m
@@ -42,7 +50,19 @@ Cоздать свой обьект Request
 php artisan make:request TestRequest
 ```
 
+Cоздать Observers
+```
+php artisan make:observer BlogPostObserver --model=Models/Blog/BlogPost
+php artisan make:observer BlogCategoryObserver --model=Models/Blog/BlogCategory
+```
+
+Запуск vue
+```
+npm run watch -- --watch-poll
+```
 
 
 
-https://www.youtube.com/watch?v=q9_do7NdRhw&list=PLoonZ8wII66iP0fJPHhkLXa3k7CMef9ak&index=13
+
+https://www.youtube.com/watch?v=WQb2BC8xezY&list=PLoonZ8wII66iP0fJPHhkLXa3k7CMef9ak&index=47
+https://www.youtube.com/watch?v=wRGhohwRPe8

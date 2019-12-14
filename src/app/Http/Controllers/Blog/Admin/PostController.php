@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers\Blog\Admin;
 use App\Http\Controllers\Blog\BaseController;
+use App\Http\Requests\BlogPostCreateRequest;
+use App\Http\Requests\BlogPostUpdateRequest;
 use App\Jobs\TestJob;
+use App\Models\Blog\BlogPost;
+use App\Repositories\BlogCategoryRepository;
 use App\Repositories\BlogPostRepository;
 use Illuminate\Http\Request;
 
+/**
+ * Class PostController
+ * @property BlogPostRepository $blogPostRepository
+ */
 class PostController extends BaseController
 {
     private $blogPostRepository;
@@ -23,35 +31,48 @@ class PostController extends BaseController
      */
     public function index()
     {
-        for ($i = 0; $i < 1000 ; $i++) {
-            TestJob::dispatch(str_random(32));
-            TestJob::dispatch(str_random(32))->onQueue('test');
-        }
-
         $paginator = $this->blogPostRepository->getAllWithPaginate(10);
 
         return view('blog.admin.posts.index', compact('paginator'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * @param BlogCategoryRepository $blogCategoryRepository
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function create()
+    public function create(BlogCategoryRepository $blogCategoryRepository)
     {
-        //
+        $item = new BlogPost();
+        $categoryList = $blogCategoryRepository->getCategoryList();
+
+        return view('blog.admin.posts.create', compact('item', 'categoryList'));
     }
 
+
     /**
-     * Store a newly created resource in storage.
+     * @param BlogPostCreateRequest  $request
+     * @param BlogCategoryRepository $blogCategoryRepository
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(BlogPostCreateRequest $request, BlogCategoryRepository $blogCategoryRepository)
     {
-        //
+        $data = $request->input();
+
+        $item = (new BlogPost())->create($data);
+
+        if ($item) {
+            return redirect()
+                ->route('blog.admin.posts.edit', $item->id)
+                ->with(['success' => 'Сохранено']);
+        } else {
+            return back()
+                ->withErrors([
+                    'msg' => "Ошибка"
+                ])
+                ->withInput();
+        }
     }
 
     /**
@@ -65,27 +86,59 @@ class PostController extends BaseController
         //
     }
 
+
     /**
-     * Show the form for editing the specified resource.
+     * @param                        $id
+     * @param BlogCategoryRepository $blogCategoryRepository
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function edit($id)
+    public function edit($id, BlogCategoryRepository $blogCategoryRepository)
     {
-        //
+        $item = $this->blogPostRepository->getEdit($id);
+
+        if (empty($item)) {
+            abort(404);
+        }
+
+        $categoryList = $blogCategoryRepository->getCategoryList();
+
+        return view('blog.admin.posts.edit', compact('item', 'categoryList'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * @param BlogPostUpdateRequest   $request
+     * @param                         $id
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(BlogPostUpdateRequest $request, $id)
     {
-        //
+        $item = $this->blogPostRepository->getEdit($id);
+        if (empty($item)) {
+            return back()
+                ->withErrors([
+                    'msg' => "Запись {$id} не найдена"
+                ])
+                ->withInput();
+        }
+        $data = $request->input();
+
+        $result = $item
+            ->fill($data)
+            ->save();
+
+        if ($result) {
+            return redirect()
+                ->route('blog.admin.posts.edit', $item->id)
+                ->with(['success' => 'Сохранено']);
+        } else {
+            return back()
+                ->withErrors([
+                    'msg' => "Ошибка"
+                ])
+                ->withInput();
+        }
     }
 
     /**
@@ -96,6 +149,6 @@ class PostController extends BaseController
      */
     public function destroy($id)
     {
-        //
+        dd($id);
     }
 }

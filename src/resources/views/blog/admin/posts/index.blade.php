@@ -31,7 +31,10 @@
                                     <td>{{$item->category->title}}</td>
                                     <td>{{\Carbon\Carbon::parse($item->created_at)->format('d.m.Y H:i:s')}}</td>
                                     <td>@if($item->is_published) Да @else Нет @endif</td>
-                                    <td><a href="{{route('blog.admin.posts.edit', $item->id)}}">Редактировать</a></td>
+                                    <td class="d-flex">
+                                        <a href="{{route('blog.admin.posts.edit', $item->id)}}" class="btn btn-outline-primary mr-1 ml-1">Редактировать</a>
+                                        @include('blog.admin.posts.includes.delete')
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>

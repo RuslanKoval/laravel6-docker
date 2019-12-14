@@ -52,17 +52,11 @@ class CategoryController extends Controller
      */
     public function store(BlogCategoryCreateRequest $request)
     {
-
         $data = $request->input();
-        if (empty($data['slug'])) {
-            $data['slug'] = str_slug($data['title']);
-        }
-
 //        $item = new BlogCategory($data);
 //          $result = $item->save();
 
         $item = (new BlogCategory())->create($data);
-
 
         if ($item) {
             return redirect()
@@ -151,10 +145,6 @@ class CategoryController extends Controller
         }
         //        $data = $request->all();
         $data = $request->input();
-
-        if (empty($data['slug'])) {
-            $data['slug'] = str_slug($data['title']);
-        }
 
         $result = $item
             ->fill($data)

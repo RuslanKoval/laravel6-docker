@@ -13,6 +13,14 @@ class BlogPostRepository  extends CoreRepository
 {
 
     /**
+     * получить модель по id
+     */
+    public function getEdit($id)
+    {
+        return $this->startConditions()->find($id);
+    }
+
+    /**
      * @param int $perPage
      *
      * @return LengthAwarePaginator
