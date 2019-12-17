@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Blog\BlogCategory;
 use App\Models\Blog\BlogCategory as Model;
 
 /**
@@ -12,6 +11,7 @@ class BlogCategoryRepository extends CoreRepository
 {
     /**
      * получить модель по id
+     * @return Model
      */
     public function getEdit($id)
     {
@@ -43,6 +43,7 @@ class BlogCategoryRepository extends CoreRepository
 
         $result = $this->startConditions()
             ->select($columns)
+            ->with('parentCategory')
             ->paginate($perPage);
 
         return $result;

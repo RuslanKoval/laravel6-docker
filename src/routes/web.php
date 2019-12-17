@@ -31,6 +31,13 @@ Route::group(['namespace' => 'Blog\Admin', 'prefix' => 'admin/blog'], function (
 });
 
 Route::group(['namespace' => 'Blog\Admin', 'prefix' => 'admin/blog'], function () {
-    Route::resource('posts', 'PostController')->except(['show'])->names('blog.admin.posts');
+    Route::resource('posts', 'PostController')->except(['show'])->names('blog.admin.posts')->middleware('test');
+});
 
+Route::group(['prefix' => 'collection'], function () {
+    Route::get('/', 'TestCollectionController@collection')->name('collection');
+});
+
+Route::group(['prefix' => 'queue'], function () {
+    Route::get('/', 'QueueController@queue')->name('queue');
 });

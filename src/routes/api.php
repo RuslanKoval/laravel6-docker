@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Laravel\Passport\Passport;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::resource('posts', 'Blog\PostController')->names('posts');
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/logout', 'Api\AuthController@logout')->name('logout');
+});
+
+Route::post('/login', 'Api\AuthController@login')->name('login');

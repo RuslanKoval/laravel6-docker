@@ -59,6 +59,11 @@ class BlogPostObserver
         //
     }
 
+    public function deleting(BlogPost $blogPost)
+    {
+        dump(__METHOD__);
+    }
+
     /**
      * Handle the blog post "deleted" event.
      *
@@ -67,7 +72,7 @@ class BlogPostObserver
      */
     public function deleted(BlogPost $blogPost)
     {
-        //
+        dump(__METHOD__);
     }
 
     /**

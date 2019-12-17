@@ -12,6 +12,9 @@ import VueRouter from 'vue-router';
 import router from './router';
 import App from './components/App';
 import vuetify from './plugins/vuetify.js'
+import store from './store'
+
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -25,11 +28,27 @@ import vuetify from './plugins/vuetify.js'
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
+Vue.component(
+    'passport-clients',
+    require('./components/passport/Clients.vue').default
+);
+
+Vue.component(
+    'passport-authorized-clients',
+    require('./components/passport/AuthorizedClients.vue').default
+);
+
+Vue.component(
+    'passport-personal-access-tokens',
+    require('./components/passport/PersonalAccessTokens.vue').default
+);
+
 Vue.use(VueRouter)
 
 const app = new Vue({
     el: '#app',
     render: h => h(App),
     router,
+    store,
     vuetify
 });

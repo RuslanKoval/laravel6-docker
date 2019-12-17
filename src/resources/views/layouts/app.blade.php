@@ -21,17 +21,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-
-    <div id="app">
-        <div class="menu">
-            <router-link to="/"> + dasdas</router-link>
-            <router-link to="/ss"> + dasdas</router-link>
-            <router-link to="/dd"> + dasdas</router-link>
-        </div>
-    </div>
-
-
-    <div style="display: none">
+    <div>
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">

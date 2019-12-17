@@ -21,7 +21,7 @@ class PostController extends BaseController
      */
     public function index()
     {
-        $items = $this->blogPostRepository->getAllWithPaginate(10);
+        $items = $this->blogPostRepository->getAllWithPaginate(3);
 
         return $items;
     }

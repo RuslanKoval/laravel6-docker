@@ -24,7 +24,7 @@
                             <tr>
                                 <td>{{$item->id}}</td>
                                 <td>{{$item->title}}</td>
-                                <td>{{$item->created_at}}</td>
+                                <td>{{$item->parentTitle}}</td>
                                 <td><a href="{{route('blog.admin.categories.edit', $item->id)}}">Редактировать</a></td>
                             </tr>
                         @endforeach

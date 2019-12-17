@@ -29,9 +29,14 @@ class PostController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $paginator = $this->blogPostRepository->getAllWithPaginate(10);
+//        $paginator = $this->blogPostRepository->getAllWithPaginate(10);
+
+        $page = $request->get('page') ?? 1;
+        $paginator =  \Cache::remember('users-'.$page, 200, function () {
+            return $this->blogPostRepository->getAllWithPaginate(10);
+        });
 
         return view('blog.admin.posts.index', compact('paginator'));
     }
@@ -142,13 +147,23 @@ class PostController extends BaseController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param $id
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
-        dd($id);
+        $result = BlogPost::destroy($id); //soft delete
+//        $result = BlogPost::find($id)->forceDelete(); //Удалить с базы
+
+        if ($result) {
+            return redirect()
+                ->route('blog.admin.posts.index')
+                ->with(['success' => 'Удалено']);
+        }
+
+        return back()->withErrors([
+            'msg' => "Ошибка"
+        ]);
     }
 }
