@@ -56,5 +56,14 @@ services:
     ports:
       - "6379:6379"
 
+  elk:
+    image: willdurand/elk
+    volumes:
+      - ./docker/elk/logstash:/etc/logstash
+      - ./docker/elk/logstash/patterns:/opt/logstash/patterns
+    ports:
+      - "8001:80"
+      - "9200:9200"
+      - "5046:5046"
 volumes:
   db-data:

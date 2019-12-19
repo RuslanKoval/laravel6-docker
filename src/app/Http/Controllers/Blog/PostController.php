@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Blog;
 use App\Repositories\BlogPostRepository;
+use Faker\Generator;
 use Illuminate\Http\Request;
 
 class PostController extends BaseController
@@ -19,8 +20,18 @@ class PostController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Generator $faker)
     {
+//        \Log::channel('custom')->info(1);
+//        \Log::channel('custom')->error(2);
+//        \Log::channel('custom')->debug(3);
+//        \Log::channel('custom')->notice(4);
+//        \Log::channel('custom')->warning(5);
+//        \Log::channel('custom')->critical(6);
+
+//        \Log::channel('logstash')->critical(6);
+
+
         $items = $this->blogPostRepository->getAllWithPaginate(3);
 
         return $items;

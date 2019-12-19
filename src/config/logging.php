@@ -95,6 +95,18 @@ return [
             'driver' => 'monolog',
             'handler' => NullHandler::class,
         ],
+        'logstash' => [
+            'driver' => 'custom',
+            'via'    => App\Logger\LogstashLogger::class,
+            'host'   => env('LOGSTASH_HOST', 'elk'),
+            'port'   => env('LOGSTASH_PORT', 5046),
+        ],
+        'custom' => [
+            'driver' => 'custom',
+            'via' => App\Logger\GelfLogger::class,
+            'host' => 'elk',
+            'port' => 12201
+        ],
     ],
 
 ];
