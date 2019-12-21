@@ -41,3 +41,6 @@ Route::group(['prefix' => 'collection'], function () {
 Route::group(['prefix' => 'queue'], function () {
     Route::get('/', 'QueueController@queue')->name('queue');
 });
+
+
+Route::get('/di', 'TestDI\DiController@store')->name('di');
