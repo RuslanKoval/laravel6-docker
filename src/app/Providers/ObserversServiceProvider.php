@@ -6,6 +6,7 @@ use App\Models\Blog\BlogCategory;
 use App\Models\Blog\BlogPost;
 use App\Observers\BlogCategoryObserver;
 use App\Observers\BlogPostObserver;
+use App\Observers\ElasticsearchObserver;
 use Illuminate\Support\ServiceProvider;
 
 /**

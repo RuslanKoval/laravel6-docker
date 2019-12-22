@@ -7,6 +7,7 @@ use App\Http\Requests\BlogPostUpdateRequest;
 use App\Jobs\TestJob;
 use App\Models\Blog\BlogPost;
 use App\Repositories\BlogCategoryRepository;
+use App\Repositories\BlogPost\BlogPostSearchInterface;
 use App\Repositories\BlogPostRepository;
 use Illuminate\Http\Request;
 
@@ -31,12 +32,12 @@ class PostController extends BaseController
      */
     public function index(Request $request)
     {
-//        $paginator = $this->blogPostRepository->getAllWithPaginate(10);
+        $paginator = $this->blogPostRepository->getAllWithPaginate(10);
 
-        $page = $request->get('page') ?? 1;
-        $paginator =  \Cache::remember('users-'.$page, 200, function () {
-            return $this->blogPostRepository->getAllWithPaginate(10);
-        });
+//        $page = $request->get('page') ?? 1;
+//        $paginator =  \Cache::remember('users-'.$page, 200, function () {
+//            return $this->blogPostRepository->getAllWithPaginate(10);
+//        });
 
         return view('blog.admin.posts.index', compact('paginator'));
     }
@@ -88,7 +89,7 @@ class PostController extends BaseController
      */
     public function show($id)
     {
-        //
+        dd(111);
     }
 
 

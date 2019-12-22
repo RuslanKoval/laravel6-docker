@@ -3,6 +3,7 @@
 namespace App\Models\Blog;
 
 use App\Models\User\User;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,10 +18,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property $is_published
  * @property $user_id
  * @property $published_at
+ * @mixin Searchable
  */
 class BlogPost extends Model
 {
     use SoftDeletes;
+    use Searchable;
 
     const UNKNOWN_USER = 1;
 

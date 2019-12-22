@@ -179,7 +179,8 @@ return [
         App\Providers\ObserversServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
         App\Providers\DIServiceProvider::class,
-        PHPZen\LaravelRbac\RbacServiceProvider::class
+        PHPZen\LaravelRbac\RbacServiceProvider::class,
+        App\Providers\SearchServiceProvider::class
     ],
 
     /*

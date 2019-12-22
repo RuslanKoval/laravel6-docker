@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Blog;
+use App\Repositories\BlogPost\BlogPostSearchInterface;
 use App\Repositories\BlogPostRepository;
-use Faker\Generator;
 use Illuminate\Http\Request;
 
 class PostController extends BaseController
@@ -20,7 +20,7 @@ class PostController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Generator $faker)
+    public function index(Request $request, BlogPostSearchInterface $blogPostSearch)
     {
 //        \Log::channel('custom')->info(1);
 //        \Log::channel('custom')->error(2);
@@ -31,8 +31,18 @@ class PostController extends BaseController
 
 //        \Log::channel('logstash')->critical(6);
 
+        $search = $request->input('search');
+        $perPage = $request->input('per-page') ?? 5;
 
-        $items = $this->blogPostRepository->getAllWithPaginate(3);
+        if ($search) {
+            $items = $blogPostSearch
+                ->search($search)
+                ->paginate($perPage);
+        } else {
+            $items = $this
+                ->blogPostRepository
+                ->getAllWithPaginate($perPage);
+        }
 
         return $items;
     }

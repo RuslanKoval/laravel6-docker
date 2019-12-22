@@ -9,7 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * Class BlogPostRepository
  */
-class BlogPostRepository  extends CoreRepository
+class BlogPostRepository extends CoreRepository
 {
 
     /**

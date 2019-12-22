@@ -1876,6 +1876,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator_index_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator_index_js__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -1900,8 +1916,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  computed: Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['allPosts', 'pagination']),
-  methods: Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapActions"])(['fetchPosts', 'first', 'prev', 'next', 'last']),
+  data: function data() {
+    return {
+      searchVal: ''
+    };
+  },
+  computed: Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['allPosts', 'pagination', 'searchValue']),
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapActions"])(['fetchPosts', 'first', 'prev', 'next', 'last', 'search']), {
+    runSearch: function runSearch(search) {
+      this.search(search);
+    },
+    resetSearch: function resetSearch() {
+      this.searchVal = '';
+      this.search();
+    }
+  }),
   created: function created() {},
   mounted: function mounted() {
     return _babel_runtime_regenerator_index_js__WEBPACK_IMPORTED_MODULE_0___default.a.async(function mounted$(_context) {
@@ -1909,8 +1938,9 @@ __webpack_require__.r(__webpack_exports__);
         switch (_context.prev = _context.next) {
           case 0:
             this.fetchPosts();
+            this.searchVal = this.searchValue;
 
-          case 1:
+          case 2:
           case "end":
             return _context.stop();
         }
@@ -41490,6 +41520,58 @@ var render = function() {
     "div",
     { staticClass: "container" },
     [
+      _c("div", { staticClass: "search mb-5" }, [
+        _c("div", { staticClass: "input-group" }, [
+          _c("div", { staticClass: "input-group-prepend" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-outline-danger",
+                on: {
+                  click: function($event) {
+                    return _vm.resetSearch()
+                  }
+                }
+              },
+              [_vm._v("reset")]
+            )
+          ]),
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.searchVal,
+                expression: "searchVal"
+              }
+            ],
+            staticClass: "form-control",
+            domProps: { value: _vm.searchVal },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.searchVal = $event.target.value
+              }
+            }
+          }),
+          _c("div", { staticClass: "input-group-prepend" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-outline-success",
+                on: {
+                  click: function($event) {
+                    return _vm.runSearch(_vm.searchVal)
+                  }
+                }
+              },
+              [_vm._v("search")]
+            )
+          ])
+        ])
+      ]),
       _vm._l(_vm.allPosts, function(post) {
         return _c("div", { staticClass: "card mb-2" }, [
           _c(
@@ -41513,37 +41595,57 @@ var render = function() {
           )
         ])
       }),
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "pagination col-9" }, [
-          _c("li", { staticClass: "page-item" }, [
-            _c("a", { staticClass: "page-link", on: { click: _vm.first } }, [
-              _vm._v("first")
-            ])
-          ]),
-          _c("li", { staticClass: "page-item" }, [
-            _c("a", { staticClass: "page-link", on: { click: _vm.prev } }, [
-              _vm._v("prev")
-            ])
-          ]),
-          _c("li", { staticClass: "page-item" }, [
-            _c("a", { staticClass: "page-link", on: { click: _vm.next } }, [
-              _vm._v("next")
-            ])
-          ]),
-          _c("li", { staticClass: "page-item" }, [
-            _c("a", { staticClass: "page-link", on: { click: _vm.last } }, [
-              _vm._v("last")
+      _vm.pagination.last_page > 1
+        ? _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "pagination col-9" }, [
+              _vm.pagination.current != 1
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "button",
+                      { staticClass: "page-link", on: { click: _vm.first } },
+                      [_vm._v("first")]
+                    )
+                  ])
+                : _vm._e(),
+              _vm.pagination.current != 1
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "button",
+                      { staticClass: "page-link", on: { click: _vm.prev } },
+                      [_vm._v("<<")]
+                    )
+                  ])
+                : _vm._e(),
+              _vm.pagination.to != _vm.pagination.total
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "button",
+                      { staticClass: "page-link", on: { click: _vm.next } },
+                      [_vm._v(">>")]
+                    )
+                  ])
+                : _vm._e(),
+              _vm.pagination.to != _vm.pagination.total
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "button",
+                      { staticClass: "page-link", on: { click: _vm.last } },
+                      [_vm._v("last")]
+                    )
+                  ])
+                : _vm._e()
+            ]),
+            _c("div", { staticClass: "col-3" }, [
+              _c("span", { staticClass: "float-right" }, [
+                _vm._v(
+                  _vm._s(_vm.pagination.to) +
+                    " / " +
+                    _vm._s(_vm.pagination.total)
+                )
+              ])
             ])
           ])
-        ]),
-        _c("div", { staticClass: "col-3" }, [
-          _c("span", { staticClass: "float-right" }, [
-            _vm._v(
-              _vm._s(_vm.pagination.to) + " / " + _vm._s(_vm.pagination.total)
-            )
-          ])
-        ])
-      ])
+        : _vm._e()
     ],
     2
   )
@@ -96851,11 +96953,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-function getData() {
-  return axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=1');
-}
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   state: {
     posts: [],
@@ -96865,15 +96962,27 @@ function getData() {
       to: null,
       total: null
     },
-    page: 1
+    page: 1,
+    search: ""
   },
   actions: {
     fetchPosts: function fetchPosts(contex) {
+      var page,
+          url,
+          search,
+          _args = arguments;
       return _babel_runtime_regenerator_index_js__WEBPACK_IMPORTED_MODULE_0___default.a.async(function fetchPosts$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=1').then(function (response) {
+              page = _args.length > 1 && _args[1] !== undefined ? _args[1] : 1;
+              url = Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=' + page, search = contex.getters.searchValue;
+
+              if (search) {
+                url = url + "&search=" + search;
+              }
+
+              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(url).then(function (response) {
                 contex.commit('updatePosts', response.data.data);
                 contex.commit('updatePagination', {
                   last_page: response.data.last_page,
@@ -96883,7 +96992,7 @@ function getData() {
                 });
               });
 
-            case 1:
+            case 4:
             case "end":
               return _context.stop();
           }
@@ -96897,15 +97006,7 @@ function getData() {
           switch (_context2.prev = _context2.next) {
             case 0:
               page = 1;
-              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=' + page).then(function (response) {
-                contex.commit('updatePosts', response.data.data);
-                contex.commit('updatePagination', {
-                  last_page: response.data.last_page,
-                  total: response.data.total,
-                  to: response.data.to,
-                  current: response.data.current_page
-                });
-              });
+              contex.dispatch('fetchPosts', page);
 
             case 2:
             case "end":
@@ -96921,15 +97022,7 @@ function getData() {
           switch (_context3.prev = _context3.next) {
             case 0:
               page = contex.state.pagination.last_page;
-              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=' + page).then(function (response) {
-                contex.commit('updatePosts', response.data.data);
-                contex.commit('updatePagination', {
-                  last_page: response.data.last_page,
-                  total: response.data.total,
-                  to: response.data.to,
-                  current: response.data.current_page
-                });
-              });
+              contex.dispatch('fetchPosts', page);
 
             case 2:
             case "end":
@@ -96946,15 +97039,7 @@ function getData() {
             case 0:
               page = contex.state.pagination.current;
               page = page + 1;
-              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=' + page).then(function (response) {
-                contex.commit('updatePosts', response.data.data);
-                contex.commit('updatePagination', {
-                  last_page: response.data.last_page,
-                  total: response.data.total,
-                  to: response.data.to,
-                  current: response.data.current_page
-                });
-              });
+              contex.dispatch('fetchPosts', page);
 
             case 3:
             case "end":
@@ -96971,19 +97056,32 @@ function getData() {
             case 0:
               page = contex.state.pagination.current;
               page = page - 1;
-              axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(Object(_route__WEBPACK_IMPORTED_MODULE_2__["default"])('posts.index') + '?page=' + page).then(function (response) {
-                contex.commit('updatePosts', response.data.data);
-                contex.commit('updatePagination', {
-                  last_page: response.data.last_page,
-                  total: response.data.total,
-                  to: response.data.to,
-                  current: response.data.current_page
-                });
-              });
+              contex.dispatch('fetchPosts', page);
 
             case 3:
             case "end":
               return _context5.stop();
+          }
+        }
+      });
+    },
+    search: function search(contex) {
+      var _search,
+          page,
+          _args6 = arguments;
+
+      return _babel_runtime_regenerator_index_js__WEBPACK_IMPORTED_MODULE_0___default.a.async(function search$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              _search = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : '';
+              page = 1;
+              contex.commit('updateSearch', _search);
+              contex.dispatch('fetchPosts', page);
+
+            case 4:
+            case "end":
+              return _context6.stop();
           }
         }
       });
@@ -96995,6 +97093,9 @@ function getData() {
     },
     pagination: function pagination(state) {
       return state.pagination;
+    },
+    searchValue: function searchValue(state) {
+      return state.search;
     }
   },
   mutations: {
@@ -97003,6 +97104,9 @@ function getData() {
     },
     updatePagination: function updatePagination(state, pagination) {
       state.pagination = pagination;
+    },
+    updateSearch: function updateSearch(state, search) {
+      state.search = search;
     }
   }
 });
