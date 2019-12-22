@@ -178,7 +178,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\ObserversServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
-        \App\Providers\DIServiceProvider::class
+        App\Providers\DIServiceProvider::class,
+        PHPZen\LaravelRbac\RbacServiceProvider::class
     ],
 
     /*
