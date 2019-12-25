@@ -44,4 +44,7 @@ Route::group(['prefix' => 'queue'], function () {
 
 
 Route::get('/di', 'TestDI\DiController@store')->name('di');
+
 Route::get('/rbac', 'RbacTestController@index')->name('rbac-test');
+
+Route::get('/file-storage', 'FileStorageController@index')->name('file-storage');

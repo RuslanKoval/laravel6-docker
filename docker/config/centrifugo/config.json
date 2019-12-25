@@ -1,0 +1,27 @@
+{
+    "secret": "very-long-secret-key",
+    "api_key": "secret-api-key",
+    "admin_password": "password",
+    "admin_secret": "secret",
+    "anonymous": true,
+    "publish": true,
+    "presence": true,
+    "join_leave": true,
+    "history_size": 10,
+    "history_lifetime": 30,
+    "namespaces": [
+        {
+            "name": "public",
+            "publish": true,
+            "anonymous": true,
+            "history_size": 10,
+            "history_lifetime": 300,
+            "history_recover": true
+        },
+        {
+            "name": "gossips",
+            "presence": true,
+            "join_leave": true
+        }
+    ]
+}

@@ -10,6 +10,7 @@ services:
       - redis
     volumes:
       - ./src/:/application:cached
+      - ./.data/file-storage:/file-storage
 
   horizon:
     build: ./docker/config/php
@@ -65,5 +66,14 @@ services:
       - "8001:80"
       - "9200:9200"
       - "5046:5046"
+
+  centrifugo:
+    image: centrifugo/centrifugo
+    volumes:
+      - ./docker/config/centrifugo/config.json:/centrifugo/config.json
+    command: centrifugo --config=config.json --admin
+    ports:
+      - "888:8000"
+
 volumes:
   db-data:

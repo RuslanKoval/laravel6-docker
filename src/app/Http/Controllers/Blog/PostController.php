@@ -29,7 +29,7 @@ class PostController extends BaseController
 //        \Log::channel('custom')->warning(5);
 //        \Log::channel('custom')->critical(6);
 
-//        \Log::channel('logstash')->critical(6);
+//        \Log::channel('logstash')->critical("My first log");
 
         $search = $request->input('search');
         $perPage = $request->input('per-page') ?? 5;
