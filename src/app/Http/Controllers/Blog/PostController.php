@@ -31,6 +31,9 @@ class PostController extends BaseController
 
 //        \Log::channel('logstash')->critical("My first log");
 
+        $client = new \phpcent\Client("centrifugo:8000/api");
+        $client->setApiKey("cf8b594b-ec4d-409f-86f4-fc4b067e1098");
+
         $search = $request->input('search');
         $perPage = $request->input('per-page') ?? 5;
 
@@ -43,6 +46,9 @@ class PostController extends BaseController
                 ->blogPostRepository
                 ->getAllWithPaginate($perPage);
         }
+
+
+        $client->publish("news", $items);
 
         return $items;
     }

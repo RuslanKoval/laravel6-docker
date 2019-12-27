@@ -1,6 +1,6 @@
 {
-    "secret": "very-long-secret-key",
-    "api_key": "secret-api-key",
+    "secret": "cf8b594b-ec4d-409f-86f4-fc4b067e1098",
+    "api_key": "cf8b594b-ec4d-409f-86f4-fc4b067e1098",
     "admin_password": "password",
     "admin_secret": "secret",
     "anonymous": true,

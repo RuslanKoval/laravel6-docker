@@ -1850,14 +1850,50 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 //
 //
 //
 //
 //
+var Centrifuge = __webpack_require__(/*! centrifuge */ "./node_modules/centrifuge/dist/centrifuge.js");
+
+var SockJS = __webpack_require__(/*! sockjs-client */ "./node_modules/sockjs-client/lib/entry.js");
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      centrifugo: ''
+    };
+  },
+  methods: {
+    initCentrifugo: function initCentrifugo() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('http://localhost:8000/centrifugo/token').then(function (response) {
+        _this.centrifugo = new Centrifuge(response.data.url);
+
+        _this.centrifugo.setToken(response.data.token);
+
+        _this.subscribe();
+
+        _this.centrifugo.connect();
+      });
+    },
+    subscribe: function subscribe() {
+      this.centrifugo.subscribe("news", function (message) {
+        console.log(message);
+      });
+      this.centrifugo.on("connect", function () {
+        console.log('connect');
+      });
+    }
+  },
   mounted: function mounted() {
-    console.log('Component mounted.');
+    this.initCentrifugo();
+    console.log('Component mountesd. ss');
   }
 });
 
@@ -7365,6 +7401,2825 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 /***/ }),
 
+/***/ "./node_modules/centrifuge/dist/centrifuge.js":
+/*!****************************************************!*\
+  !*** ./node_modules/centrifuge/dist/centrifuge.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(true)
+		module.exports = factory();
+	else {}
+})(typeof self !== 'undefined' ? self : this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 10:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Centrifuge = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = __webpack_require__(6);
+
+var _events2 = _interopRequireDefault(_events);
+
+var _subscription = __webpack_require__(11);
+
+var _subscription2 = _interopRequireDefault(_subscription);
+
+var _json = __webpack_require__(12);
+
+var _utils = __webpack_require__(7);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _errorTimeout = 'timeout';
+var _errorConnectionClosed = 'connection closed';
+
+var Centrifuge = exports.Centrifuge = function (_EventEmitter) {
+  _inherits(Centrifuge, _EventEmitter);
+
+  function Centrifuge(url, options) {
+    _classCallCheck(this, Centrifuge);
+
+    var _this = _possibleConstructorReturn(this, (Centrifuge.__proto__ || Object.getPrototypeOf(Centrifuge)).call(this));
+
+    _this._url = url;
+    _this._websocket = null;
+    _this._sockjs = null;
+    _this._isSockjs = false;
+    _this._binary = false;
+    _this._methodType = null;
+    _this._pushType = null;
+    _this._encoder = null;
+    _this._decoder = null;
+    _this._status = 'disconnected';
+    _this._reconnect = true;
+    _this._reconnecting = false;
+    _this._transport = null;
+    _this._transportName = null;
+    _this._transportClosed = true;
+    _this._messageId = 0;
+    _this._clientID = null;
+    _this._refreshRequired = false;
+    _this._subs = {};
+    _this._lastSeq = {};
+    _this._lastGen = {};
+    _this._lastEpoch = {};
+    _this._messages = [];
+    _this._isBatching = false;
+    _this._isSubscribeBatching = false;
+    _this._privateChannels = {};
+    _this._numRefreshFailed = 0;
+    _this._refreshTimeout = null;
+    _this._pingTimeout = null;
+    _this._pongTimeout = null;
+    _this._subRefreshTimeouts = {};
+    _this._retries = 0;
+    _this._callbacks = {};
+    _this._latency = null;
+    _this._latencyStart = null;
+    _this._connectData = null;
+    _this._token = null;
+    _this._xhrID = 0;
+    _this._xhrs = {};
+    _this._config = {
+      debug: false,
+      websocket: null,
+      sockjs: null,
+      promise: null,
+      minRetry: 1000,
+      maxRetry: 20000,
+      timeout: 5000,
+      ping: true,
+      pingInterval: 25000,
+      pongWaitTimeout: 5000,
+      privateChannelPrefix: '$',
+      onTransportClose: null,
+      sockjsServer: null,
+      sockjsTransports: ['websocket', 'xdr-streaming', 'xhr-streaming', 'eventsource', 'iframe-eventsource', 'iframe-htmlfile', 'xdr-polling', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling'],
+      refreshEndpoint: '/centrifuge/refresh',
+      refreshHeaders: {},
+      refreshParams: {},
+      refreshData: {},
+      refreshAttempts: null,
+      refreshInterval: 1000,
+      onRefreshFailed: null,
+      onRefresh: null,
+      subscribeEndpoint: '/centrifuge/subscribe',
+      subscribeHeaders: {},
+      subscribeParams: {},
+      subRefreshInterval: 1000,
+      onPrivateSubscribe: null
+    };
+    _this._configure(options);
+    return _this;
+  }
+
+  _createClass(Centrifuge, [{
+    key: 'setToken',
+    value: function setToken(token) {
+      this._token = token;
+    }
+  }, {
+    key: 'setConnectData',
+    value: function setConnectData(data) {
+      this._connectData = data;
+    }
+  }, {
+    key: 'setRefreshHeaders',
+    value: function setRefreshHeaders(headers) {
+      this._config.refreshHeaders = headers;
+    }
+  }, {
+    key: 'setRefreshParams',
+    value: function setRefreshParams(params) {
+      this._config.refreshParams = params;
+    }
+  }, {
+    key: 'setRefreshData',
+    value: function setRefreshData(data) {
+      this._config.refreshData = data;
+    }
+  }, {
+    key: 'setSubscribeHeaders',
+    value: function setSubscribeHeaders(headers) {
+      this._config.subscribeHeaders = headers;
+    }
+  }, {
+    key: 'setSubscribeParams',
+    value: function setSubscribeParams(params) {
+      this._config.subscribeParams = params;
+    }
+  }, {
+    key: '_ajax',
+    value: function _ajax(url, params, headers, data, callback) {
+      var _this2 = this;
+
+      var query = '';
+      this._debug('sending AJAX request to', url, 'with data', JSON.stringify(data));
+
+      var xhr = global.XMLHttpRequest ? new global.XMLHttpRequest() : new global.ActiveXObject('Microsoft.XMLHTTP');
+
+      for (var i in params) {
+        if (params.hasOwnProperty(i)) {
+          if (query.length > 0) {
+            query += '&';
+          }
+          query += encodeURIComponent(i) + '=' + encodeURIComponent(params[i]);
+        }
+      }
+      if (query.length > 0) {
+        query = '?' + query;
+      }
+      xhr.open('POST', url + query, true);
+      if ('withCredentials' in xhr) {
+        xhr.withCredentials = true;
+      }
+
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      for (var headerName in headers) {
+        if (headers.hasOwnProperty(headerName)) {
+          xhr.setRequestHeader(headerName, headers[headerName]);
+        }
+      }
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var _data = void 0,
+                parsed = false;
+            try {
+              _data = JSON.parse(xhr.responseText);
+              parsed = true;
+            } catch (e) {
+              callback({
+                error: 'Invalid JSON. Data was: ' + xhr.responseText,
+                status: 200,
+                data: null
+              });
+            }
+            if (parsed) {
+              // prevents double execution.
+              callback({
+                data: _data,
+                status: 200
+              });
+            }
+          } else {
+            _this2._log('wrong status code in AJAX response', xhr.status);
+            callback({
+              status: xhr.status,
+              data: null
+            });
+          }
+        }
+      };
+      setTimeout(function () {
+        return xhr.send(JSON.stringify(data));
+      }, 20);
+      return xhr;
+    }
+  }, {
+    key: '_log',
+    value: function _log() {
+      (0, _utils.log)('info', arguments);
+    }
+  }, {
+    key: '_debug',
+    value: function _debug() {
+      if (this._config.debug === true) {
+        (0, _utils.log)('debug', arguments);
+      }
+    }
+  }, {
+    key: '_websocketSupported',
+    value: function _websocketSupported() {
+      if (this._config.websocket !== null) {
+        return true;
+      }
+      return !(typeof WebSocket !== 'function' && (typeof WebSocket === 'undefined' ? 'undefined' : _typeof(WebSocket)) !== 'object');
+    }
+  }, {
+    key: '_setFormat',
+    value: function _setFormat(format) {
+      if (this._formatOverride(format)) {
+        return;
+      }
+      if (format === 'protobuf') {
+        throw new Error('not implemented by JSON only Centrifuge client – use client with Protobuf');
+      }
+      this._binary = false;
+      this._methodType = _json.JsonMethodType;
+      this._pushType = _json.JsonPushType;
+      this._encoder = new _json.JsonEncoder();
+      this._decoder = new _json.JsonDecoder();
+    }
+  }, {
+    key: '_formatOverride',
+    value: function _formatOverride(format) {
+      return false;
+    }
+  }, {
+    key: '_configure',
+    value: function _configure(configuration) {
+      if (!('Promise' in global)) {
+        throw new Error('Promise polyfill required');
+      }
+
+      (0, _utils.extend)(this._config, configuration || {});
+      this._debug('centrifuge config', this._config);
+
+      if (!this._url) {
+        throw new Error('url required');
+      }
+
+      if ((0, _utils.startsWith)(this._url, 'ws') && this._url.indexOf('format=protobuf') > -1) {
+        this._setFormat('protobuf');
+      } else {
+        this._setFormat('json');
+      }
+
+      if ((0, _utils.startsWith)(this._url, 'http')) {
+        this._debug('client will try to connect to SockJS endpoint');
+        if (this._config.sockjs !== null) {
+          this._debug('SockJS explicitly provided in options');
+          this._sockjs = this._config.sockjs;
+        } else {
+          if (typeof global.SockJS === 'undefined') {
+            throw new Error('SockJS not found, use ws:// in url or include SockJS');
+          }
+          this._debug('use globally defined SockJS');
+          this._sockjs = global.SockJS;
+        }
+      } else {
+        this._debug('client will connect to websocket endpoint');
+      }
+    }
+  }, {
+    key: '_setStatus',
+    value: function _setStatus(newStatus) {
+      if (this._status !== newStatus) {
+        this._debug('Status', this._status, '->', newStatus);
+        this._status = newStatus;
+      }
+    }
+  }, {
+    key: '_isDisconnected',
+    value: function _isDisconnected() {
+      return this._status === 'disconnected';
+    }
+  }, {
+    key: '_isConnecting',
+    value: function _isConnecting() {
+      return this._status === 'connecting';
+    }
+  }, {
+    key: '_isConnected',
+    value: function _isConnected() {
+      return this._status === 'connected';
+    }
+  }, {
+    key: '_nextMessageId',
+    value: function _nextMessageId() {
+      return ++this._messageId;
+    }
+  }, {
+    key: '_resetRetry',
+    value: function _resetRetry() {
+      this._debug('reset retries count to 0');
+      this._retries = 0;
+    }
+  }, {
+    key: '_getRetryInterval',
+    value: function _getRetryInterval() {
+      var interval = (0, _utils.backoff)(this._retries, this._config.minRetry, this._config.maxRetry);
+
+      this._retries += 1;
+      return interval;
+    }
+  }, {
+    key: '_abortInflightXHRs',
+    value: function _abortInflightXHRs() {
+      for (var xhrID in this._xhrs) {
+        try {
+          this._xhrs[xhrID].abort();
+        } catch (e) {
+          this._debug('error aborting xhr', e);
+        }
+        delete this._xhrs[xhrID];
+      }
+    }
+  }, {
+    key: '_clearConnectedState',
+    value: function _clearConnectedState(reconnect) {
+      this._clientID = null;
+      this._stopPing();
+
+      // fire errbacks of registered outgoing calls.
+      for (var id in this._callbacks) {
+        if (this._callbacks.hasOwnProperty(id)) {
+          var callbacks = this._callbacks[id];
+          clearTimeout(callbacks.timeout);
+          var errback = callbacks.errback;
+          if (!errback) {
+            continue;
+          }
+          errback({ error: this._createErrorObject('disconnected') });
+        }
+      }
+      this._callbacks = {};
+
+      // fire unsubscribe events
+      for (var channel in this._subs) {
+        if (this._subs.hasOwnProperty(channel)) {
+          var sub = this._subs[channel];
+
+          if (reconnect) {
+            if (sub._isSuccess()) {
+              sub._triggerUnsubscribe();
+              sub._recover = true;
+            }
+            if (sub._shouldResubscribe()) {
+              sub._setSubscribing();
+            }
+          } else {
+            sub._setUnsubscribed();
+          }
+        }
+      }
+
+      this._abortInflightXHRs();
+
+      // clear refresh timer
+      if (this._refreshTimeout !== null) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = null;
+      }
+
+      // clear sub refresh timers
+      for (var _channel in this._subRefreshTimeouts) {
+        if (this._subRefreshTimeouts.hasOwnProperty(_channel) && this._subRefreshTimeouts[_channel]) {
+          this._clearSubRefreshTimeout(_channel);
+        }
+      }
+      this._subRefreshTimeouts = {};
+
+      if (!this._reconnect) {
+        // completely clear subscriptions
+        this._subs = {};
+      }
+    }
+  }, {
+    key: '_isTransportOpen',
+    value: function _isTransportOpen() {
+      if (this._isSockjs) {
+        return this._transport && this._transport.transport && this._transport.transport.readyState === this._transport.transport.OPEN;
+      }
+      return this._transport && this._transport.readyState === this._transport.OPEN;
+    }
+  }, {
+    key: '_transportSend',
+    value: function _transportSend(commands) {
+      if (!commands.length) {
+        return true;
+      }
+
+      if (!this._isTransportOpen()) {
+        // resolve pending commands with error if transport is not open
+        for (var command in commands) {
+          var id = command.id;
+          if (!(id in this._callbacks)) {
+            continue;
+          }
+          var callbacks = this._callbacks[id];
+          clearTimeout(this._callbacks[id].timeout);
+          delete this._callbacks[id];
+          var errback = callbacks.errback;
+          errback({ error: this._createErrorObject(_errorConnectionClosed, 0) });
+        }
+        return false;
+      }
+      this._transport.send(this._encoder.encodeCommands(commands));
+      return true;
+    }
+  }, {
+    key: '_setupTransport',
+    value: function _setupTransport() {
+      var _this3 = this;
+
+      this._isSockjs = false;
+
+      // detect transport to use - SockJS or Websocket
+      if (this._sockjs !== null) {
+        var sockjsOptions = {
+          transports: this._config.sockjsTransports
+        };
+
+        if (this._config.sockjsServer !== null) {
+          sockjsOptions.server = this._config.sockjsServer;
+        }
+        this._isSockjs = true;
+        this._transport = new this._sockjs(this._url, null, sockjsOptions);
+      } else {
+        if (!this._websocketSupported()) {
+          this._debug('No Websocket support and no SockJS configured, can not connect');
+          return;
+        }
+        if (this._config.websocket !== null) {
+          this._websocket = this._config.websocket;
+        } else {
+          this._websocket = WebSocket;
+        }
+        this._transport = new this._websocket(this._url);
+        if (this._binary === true) {
+          this._transport.binaryType = 'arraybuffer';
+        }
+      }
+
+      this._transport.onopen = function () {
+        _this3._transportClosed = false;
+
+        if (_this3._isSockjs) {
+          _this3._transportName = 'sockjs-' + _this3._transport.transport;
+          _this3._transport.onheartbeat = function () {
+            return _this3._restartPing();
+          };
+        } else {
+          _this3._transportName = 'websocket';
+        }
+
+        // Can omit method here due to zero value.
+        var msg = {
+          // method: this._methodType.CONNECT
+        };
+
+        if (_this3._token || _this3._connectData) {
+          msg.params = {};
+        }
+
+        if (_this3._token) {
+          msg.params.token = _this3._token;
+        }
+
+        if (_this3._connectData) {
+          msg.params.data = _this3._connectData;
+        }
+
+        _this3._latencyStart = new Date();
+        _this3._call(msg).then(function (resolveCtx) {
+          _this3._connectResponse(_this3._decoder.decodeCommandResult(_this3._methodType.CONNECT, resolveCtx.result));
+          if (resolveCtx.next) {
+            resolveCtx.next();
+          }
+        }, function (rejectCtx) {
+          var err = rejectCtx.error;
+          if (err.code === 109) {
+            // token expired.
+            _this3._refreshRequired = true;
+          }
+          _this3._disconnect('connect error', true);
+          if (rejectCtx.next) {
+            rejectCtx.next();
+          }
+        });
+      };
+
+      this._transport.onerror = function (error) {
+        _this3._debug('transport level error', error);
+      };
+
+      this._transport.onclose = function (closeEvent) {
+        _this3._transportClosed = true;
+        var reason = _errorConnectionClosed;
+        var needReconnect = true;
+
+        if (closeEvent && 'reason' in closeEvent && closeEvent.reason) {
+          try {
+            var advice = JSON.parse(closeEvent.reason);
+            _this3._debug('reason is an advice object', advice);
+            reason = advice.reason;
+            needReconnect = advice.reconnect;
+          } catch (e) {
+            reason = closeEvent.reason;
+            _this3._debug('reason is a plain string', reason);
+          }
+        }
+
+        // onTransportClose callback should be executed every time transport was closed.
+        // This can be helpful to catch failed connection events (because our disconnect
+        // event only called once and every future attempts to connect do not fire disconnect
+        // event again).
+        if (_this3._config.onTransportClose !== null) {
+          _this3._config.onTransportClose({
+            event: closeEvent,
+            reason: reason,
+            reconnect: needReconnect
+          });
+        }
+
+        _this3._disconnect(reason, needReconnect);
+
+        if (_this3._reconnect === true) {
+          _this3._reconnecting = true;
+          var interval = _this3._getRetryInterval();
+
+          _this3._debug('reconnect after ' + interval + ' milliseconds');
+          setTimeout(function () {
+            if (_this3._reconnect === true) {
+              if (_this3._refreshRequired) {
+                _this3._refresh();
+              } else {
+                _this3._connect();
+              }
+            }
+          }, interval);
+        }
+      };
+
+      this._transport.onmessage = function (event) {
+        _this3._dataReceived(event.data);
+      };
+    }
+  }, {
+    key: 'rpc',
+    value: function rpc(data) {
+      var _this4 = this;
+
+      var msg = {
+        method: this._methodType.RPC,
+        params: {
+          data: data
+        }
+      };
+
+      if (!this.isConnected()) {
+        return Promise.reject(this._createErrorObject(_errorConnectionClosed, 0));
+      }
+
+      return this._call(msg).then(function (resolveCtx) {
+        if (resolveCtx.next) {
+          resolveCtx.next();
+        }
+        return _this4._decoder.decodeCommandResult(_this4._methodType.RPC, resolveCtx.result);
+      }, function (rejectCtx) {
+        if (rejectCtx.next) {
+          rejectCtx.next();
+        }
+        return Promise.reject(rejectCtx.error);
+      });
+    }
+  }, {
+    key: 'send',
+    value: function send(data) {
+      var msg = {
+        method: this._methodType.SEND,
+        params: {
+          data: data
+        }
+      };
+
+      if (!this.isConnected()) {
+        return Promise.reject(this._createErrorObject(_errorConnectionClosed, 0));
+      }
+
+      var sent = this._transportSend([msg]); // can send async message to server without id set
+      if (!sent) {
+        return Promise.reject(this._createErrorObject(_errorConnectionClosed, 0));
+      };
+      return Promise.resolve({});
+    }
+  }, {
+    key: 'publish',
+    value: function publish(channel, data) {
+      var msg = {
+        method: this._methodType.PUBLISH,
+        params: {
+          channel: channel,
+          data: data
+        }
+      };
+
+      if (!this.isConnected()) {
+        return Promise.reject(this._createErrorObject(_errorConnectionClosed, 0));
+      }
+
+      return this._call(msg).then(function (result) {
+        if (result.next) {
+          result.next();
+        }
+        return {};
+      });
+    }
+  }, {
+    key: '_dataReceived',
+    value: function _dataReceived(data) {
+      var _this5 = this;
+
+      var replies = this._decoder.decodeReplies(data);
+      // we have to guarantee order of events in replies processing - i.e. start processing
+      // next reply only when we finished processing of current one. Without syncing things in
+      // this way we could get wrong publication events order as reply promises resolve
+      // on next loop tick so for loop continues before we finished emitting all reply events.
+      var p = Promise.resolve();
+
+      var _loop = function _loop(i) {
+        if (replies.hasOwnProperty(i)) {
+          p = p.then(function () {
+            return _this5._dispatchReply(replies[i]);
+          });
+        }
+      };
+
+      for (var i in replies) {
+        _loop(i);
+      }
+      this._restartPing();
+    }
+  }, {
+    key: '_call',
+    value: function _call(msg) {
+      var _this6 = this;
+
+      return new Promise(function (resolve, reject) {
+        var id = _this6._addMessage(msg);
+        _this6._registerCall(id, resolve, reject);
+      });
+    }
+  }, {
+    key: '_connect',
+    value: function _connect() {
+      if (this.isConnected()) {
+        this._debug('connect called when already connected');
+        return;
+      }
+      if (this._status === 'connecting') {
+        return;
+      }
+
+      this._debug('start connecting');
+      this._setStatus('connecting');
+      this._clientID = null;
+      this._reconnect = true;
+      this._setupTransport();
+    }
+  }, {
+    key: '_disconnect',
+    value: function _disconnect(reason, shouldReconnect) {
+
+      var reconnect = shouldReconnect || false;
+      if (reconnect === false) {
+        this._reconnect = false;
+      }
+
+      if (this._isDisconnected()) {
+        if (!reconnect) {
+          this._clearConnectedState(reconnect);
+        }
+        return;
+      }
+
+      this._clearConnectedState(reconnect);
+      this._debug('disconnected:', reason, shouldReconnect);
+      this._setStatus('disconnected');
+
+      if (this._refreshTimeout) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = null;
+      }
+      if (this._reconnecting === false) {
+        this.emit('disconnect', {
+          reason: reason,
+          reconnect: reconnect
+        });
+      }
+
+      if (!this._transportClosed) {
+        this._transport.close();
+      }
+    }
+  }, {
+    key: '_refreshFailed',
+    value: function _refreshFailed() {
+      this._numRefreshFailed = 0;
+      if (!this._isDisconnected()) {
+        this._disconnect('refresh failed', false);
+      }
+      if (this._config.onRefreshFailed !== null) {
+        this._config.onRefreshFailed();
+      }
+    }
+  }, {
+    key: '_refresh',
+    value: function _refresh() {
+      var _this7 = this;
+
+      // ask application for new connection token.
+      this._debug('refresh token');
+
+      if (this._config.refreshAttempts === 0) {
+        this._debug('refresh attempts set to 0, do not send refresh request at all');
+        this._refreshFailed();
+        return;
+      }
+
+      if (this._refreshTimeout !== null) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = null;
+      }
+
+      var clientID = this._clientID;
+      var xhrID = this._newXHRID();
+
+      var cb = function cb(resp) {
+        if (xhrID in _this7._xhrs) {
+          delete _this7._xhrs[xhrID];
+        }
+        if (_this7._clientID !== clientID) {
+          return;
+        }
+        if (resp.error || resp.status !== 200) {
+          // We don't perform any connection status related actions here as we are
+          // relying on server that must close connection eventually.
+          if (resp.error) {
+            _this7._debug('error refreshing connection token', resp.error);
+          } else {
+            _this7._debug('error refreshing connection token: wrong status code', resp.status);
+          }
+          _this7._numRefreshFailed++;
+          if (_this7._refreshTimeout !== null) {
+            clearTimeout(_this7._refreshTimeout);
+            _this7._refreshTimeout = null;
+          }
+          if (_this7._config.refreshAttempts !== null && _this7._numRefreshFailed >= _this7._config.refreshAttempts) {
+            _this7._refreshFailed();
+            return;
+          }
+          var jitter = Math.round(Math.random() * 1000 * Math.max(_this7._numRefreshFailed, 20));
+          var interval = _this7._config.refreshInterval + jitter;
+          _this7._refreshTimeout = setTimeout(function () {
+            return _this7._refresh();
+          }, interval);
+          return;
+        }
+        _this7._numRefreshFailed = 0;
+        _this7._token = resp.data.token;
+        if (!_this7._token) {
+          _this7._refreshFailed();
+          return;
+        }
+        if (_this7._isDisconnected() && _this7._reconnect) {
+          _this7._debug('token refreshed, connect from scratch');
+          _this7._connect();
+        } else {
+          _this7._debug('send refreshed token');
+          var msg = {
+            method: _this7._methodType.REFRESH,
+            params: {
+              token: _this7._token
+            }
+          };
+          _this7._call(msg).then(function (resolveCtx) {
+            _this7._refreshResponse(_this7._decoder.decodeCommandResult(_this7._methodType.REFRESH, resolveCtx.result));
+            if (resolveCtx.next) {
+              resolveCtx.next();
+            }
+          }, function (rejectCtx) {
+            _this7._refreshError(rejectCtx.error);
+            if (rejectCtx.next) {
+              rejectCtx.next();
+            }
+          });
+        }
+      };
+
+      if (this._config.onRefresh !== null) {
+        var context = {};
+        this._config.onRefresh(context, cb);
+      } else {
+        var xhr = this._ajax(this._config.refreshEndpoint, this._config.refreshParams, this._config.refreshHeaders, this._config.refreshData, cb);
+        this._xhrs[xhrID] = xhr;
+      }
+    }
+  }, {
+    key: '_refreshError',
+    value: function _refreshError(err) {
+      var _this8 = this;
+
+      this._debug('refresh error', err);
+      if (this._refreshTimeout) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = null;
+      }
+      var interval = this._config.refreshInterval + Math.round(Math.random() * 1000);
+      this._refreshTimeout = setTimeout(function () {
+        return _this8._refresh();
+      }, interval);
+    }
+  }, {
+    key: '_refreshResponse',
+    value: function _refreshResponse(result) {
+      var _this9 = this;
+
+      if (this._refreshTimeout) {
+        clearTimeout(this._refreshTimeout);
+        this._refreshTimeout = null;
+      }
+      if (result.expires) {
+        this._clientID = result.client;
+        this._refreshTimeout = setTimeout(function () {
+          return _this9._refresh();
+        }, this._getTTLMilliseconds(result.ttl));
+      }
+    }
+  }, {
+    key: '_newXHRID',
+    value: function _newXHRID() {
+      this._xhrID++;
+      return this._xhrID;
+    }
+  }, {
+    key: '_subRefresh',
+    value: function _subRefresh(channel) {
+      var _this10 = this;
+
+      this._debug('refresh subscription token for channel', channel);
+
+      if (this._subRefreshTimeouts[channel] !== undefined) {
+        this._clearSubRefreshTimeout(channel);
+      } else {
+        return;
+      }
+
+      var clientID = this._clientID;
+      var xhrID = this._newXHRID();
+
+      var cb = function cb(resp) {
+        if (xhrID in _this10._xhrs) {
+          delete _this10._xhrs[xhrID];
+        }
+        if (resp.error || resp.status !== 200 || _this10._clientID !== clientID) {
+          return;
+        }
+        var channelsData = {};
+        if (resp.data.channels) {
+          for (var i in data.channels) {
+            var channelData = resp.data.channels[i];
+            if (!channelData.channel) {
+              continue;
+            }
+            channelsData[channelData.channel] = channelData.token;
+          }
+        }
+
+        var token = channelsData[channel];
+        if (!token) {
+          return;
+        }
+        var msg = {
+          method: _this10._methodType.SUB_REFRESH,
+          params: {
+            channel: channel,
+            token: token
+          }
+        };
+
+        var sub = _this10._getSub(channel);
+        if (sub === null) {
+          return;
+        }
+
+        _this10._call(msg).then(function (resolveCtx) {
+          _this10._subRefreshResponse(channel, _this10._decoder.decodeCommandResult(_this10._methodType.SUB_REFRESH, resolveCtx.result));
+          if (resolveCtx.next) {
+            resolveCtx.next();
+          }
+        }, function (rejectCtx) {
+          _this10._subRefreshError(channel, rejectCtx.error);
+          if (rejectCtx.next) {
+            rejectCtx.next();
+          }
+        });
+      };
+
+      var data = {
+        client: this._clientID,
+        channels: [channel]
+      };
+
+      if (this._config.onPrivateSubscribe !== null) {
+        this._config.onPrivateSubscribe({
+          data: data
+        }, cb);
+      } else {
+        var xhr = this._ajax(this._config.subscribeEndpoint, this._config.subscribeParams, this._config.subscribeHeaders, data, cb);
+        this._xhrs[xhrID] = xhr;
+      }
+    }
+  }, {
+    key: '_clearSubRefreshTimeout',
+    value: function _clearSubRefreshTimeout(channel) {
+      if (this._subRefreshTimeouts[channel] !== undefined) {
+        clearTimeout(this._subRefreshTimeouts[channel]);
+        delete this._subRefreshTimeouts[channel];
+      }
+    }
+  }, {
+    key: '_subRefreshError',
+    value: function _subRefreshError(channel, err) {
+      var _this11 = this;
+
+      this._debug('subscription refresh error', channel, err);
+      this._clearSubRefreshTimeout(channel);
+      var sub = this._getSub(channel);
+      if (sub === null) {
+        return;
+      }
+      var jitter = Math.round(Math.random() * 1000);
+      var subRefreshTimeout = setTimeout(function () {
+        return _this11._subRefresh(channel);
+      }, this._config.subRefreshInterval + jitter);
+      this._subRefreshTimeouts[channel] = subRefreshTimeout;
+      return;
+    }
+  }, {
+    key: '_subRefreshResponse',
+    value: function _subRefreshResponse(channel, result) {
+      var _this12 = this;
+
+      this._debug('subscription refresh success', channel);
+      this._clearSubRefreshTimeout(channel);
+      var sub = this._getSub(channel);
+      if (sub === null) {
+        return;
+      }
+      if (result.expires === true) {
+        var subRefreshTimeout = setTimeout(function () {
+          return _this12._subRefresh(channel);
+        }, this._getTTLMilliseconds(result.ttl));
+        this._subRefreshTimeouts[channel] = subRefreshTimeout;
+      }
+      return;
+    }
+  }, {
+    key: '_subscribe',
+    value: function _subscribe(sub, isResubscribe) {
+      var _this13 = this;
+
+      this._debug('subscribing on', sub.channel);
+      var channel = sub.channel;
+
+      if (!(channel in this._subs)) {
+        this._subs[channel] = sub;
+      }
+
+      if (!this.isConnected()) {
+        // subscribe will be called later
+        sub._setNew();
+        return;
+      }
+
+      sub._setSubscribing(isResubscribe);
+
+      var msg = {
+        method: this._methodType.SUBSCRIBE,
+        params: {
+          channel: channel
+        }
+      };
+
+      // If channel name does not start with privateChannelPrefix - then we
+      // can just send subscription message to Centrifuge. If channel name
+      // starts with privateChannelPrefix - then this is a private channel
+      // and we should ask web application backend for permission first.
+      if ((0, _utils.startsWith)(channel, this._config.privateChannelPrefix)) {
+        // private channel.
+        if (this._isSubscribeBatching) {
+          this._privateChannels[channel] = true;
+        } else {
+          this.startSubscribeBatching();
+          this._subscribe(sub);
+          this.stopSubscribeBatching();
+        }
+      } else {
+        var recover = sub._needRecover();
+
+        if (recover === true) {
+          msg.params.recover = true;
+          var seq = this._getLastSeq(channel);
+          if (seq) {
+            msg.params.seq = seq;
+          }
+          var gen = this._getLastGen(channel);
+          if (gen) {
+            msg.params.gen = gen;
+          }
+          var epoch = this._getLastEpoch(channel);
+          if (epoch) {
+            msg.params.epoch = epoch;
+          }
+        }
+
+        this._call(msg).then(function (resolveCtx) {
+          _this13._subscribeResponse(channel, recover, _this13._decoder.decodeCommandResult(_this13._methodType.SUBSCRIBE, resolveCtx.result));
+          if (resolveCtx.next) {
+            resolveCtx.next();
+          }
+        }, function (rejectCtx) {
+          _this13._subscribeError(channel, rejectCtx.error);
+          if (rejectCtx.next) {
+            rejectCtx.next();
+          }
+        });
+      }
+    }
+  }, {
+    key: '_unsubscribe',
+    value: function _unsubscribe(sub) {
+      if (this.isConnected()) {
+        // No need to unsubscribe in disconnected state - i.e. client already unsubscribed.
+        this._addMessage({
+          method: this._methodType.UNSUBSCRIBE,
+          params: {
+            channel: sub.channel
+          }
+        });
+      }
+    }
+  }, {
+    key: '_getTTLMilliseconds',
+    value: function _getTTLMilliseconds(ttl) {
+      // https://stackoverflow.com/questions/12633405/what-is-the-maximum-delay-for-setinterval
+      return Math.min(ttl * 1000, 2147483647);
+    }
+  }, {
+    key: 'getSub',
+    value: function getSub(channel) {
+      return this._getSub(channel);
+    }
+  }, {
+    key: '_getSub',
+    value: function _getSub(channel) {
+      var sub = this._subs[channel];
+      if (!sub) {
+        return null;
+      }
+      return sub;
+    }
+  }, {
+    key: '_connectResponse',
+    value: function _connectResponse(result) {
+      var _this14 = this;
+
+      var wasReconnecting = this._reconnecting;
+      this._reconnecting = false;
+      this._resetRetry();
+      this._refreshRequired = false;
+
+      if (this.isConnected()) {
+        return;
+      }
+
+      if (this._latencyStart !== null) {
+        this._latency = new Date().getTime() - this._latencyStart.getTime();
+        this._latencyStart = null;
+      }
+
+      this._clientID = result.client;
+      this._setStatus('connected');
+
+      if (this._refreshTimeout) {
+        clearTimeout(this._refreshTimeout);
+      }
+
+      if (result.expires) {
+        this._refreshTimeout = setTimeout(function () {
+          return _this14._refresh();
+        }, this._getTTLMilliseconds(result.ttl));
+      }
+
+      this.startBatching();
+      this.startSubscribeBatching();
+      for (var channel in this._subs) {
+        if (this._subs.hasOwnProperty(channel)) {
+          var sub = this._subs[channel];
+          if (sub._shouldResubscribe()) {
+            this._subscribe(sub, wasReconnecting);
+          }
+        }
+      }
+      this.stopSubscribeBatching();
+      this.stopBatching();
+
+      this._startPing();
+
+      var ctx = {
+        client: result.client,
+        transport: this._transportName,
+        latency: this._latency
+      };
+      if (result.data) {
+        ctx.data = result.data;
+      }
+
+      this.emit('connect', ctx);
+    }
+  }, {
+    key: '_stopPing',
+    value: function _stopPing() {
+      if (this._pongTimeout !== null) {
+        clearTimeout(this._pongTimeout);
+        this._pongTimeout = null;
+      }
+      if (this._pingTimeout !== null) {
+        clearTimeout(this._pingTimeout);
+        this._pingTimeout = null;
+      }
+    }
+  }, {
+    key: '_startPing',
+    value: function _startPing() {
+      var _this15 = this;
+
+      if (this._config.ping !== true || this._config.pingInterval <= 0) {
+        return;
+      }
+      if (!this.isConnected()) {
+        return;
+      }
+
+      this._pingTimeout = setTimeout(function () {
+        if (!_this15.isConnected()) {
+          _this15._stopPing();
+          return;
+        }
+        _this15.ping();
+        _this15._pongTimeout = setTimeout(function () {
+          _this15._disconnect('no ping', true);
+        }, _this15._config.pongWaitTimeout);
+      }, this._config.pingInterval);
+    }
+  }, {
+    key: '_restartPing',
+    value: function _restartPing() {
+      this._stopPing();
+      this._startPing();
+    }
+  }, {
+    key: '_subscribeError',
+    value: function _subscribeError(channel, error) {
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      if (!sub._isSubscribing()) {
+        return;
+      }
+      if (error.code === 0 && error.message === _errorTimeout) {
+        // client side timeout.
+        this._disconnect('timeout', true);
+        return;
+      }
+      sub._setSubscribeError(error);
+    }
+  }, {
+    key: '_subscribeResponse',
+    value: function _subscribeResponse(channel, isRecover, result) {
+      var _this16 = this;
+
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      if (!sub._isSubscribing()) {
+        return;
+      }
+
+      var recovered = false;
+      if ('recovered' in result) {
+        recovered = result.recovered;
+      }
+      sub._setSubscribeSuccess(recovered);
+
+      var pubs = result.publications;
+      if (pubs && pubs.length > 0) {
+        pubs = pubs.reverse();
+        for (var i in pubs) {
+          if (pubs.hasOwnProperty(i)) {
+            this._handlePublication(channel, pubs[i]);
+          }
+        }
+      }
+
+      if (result.recoverable && (!isRecover || !recovered)) {
+        this._lastSeq[channel] = result.seq || 0;
+        this._lastGen[channel] = result.gen || 0;
+      }
+
+      this._lastEpoch[channel] = result.epoch || '';
+
+      if (result.recoverable) {
+        sub._recoverable = true;
+      }
+
+      if (result.expires === true) {
+        var subRefreshTimeout = setTimeout(function () {
+          return _this16._subRefresh(channel);
+        }, this._getTTLMilliseconds(result.ttl));
+        this._subRefreshTimeouts[channel] = subRefreshTimeout;
+      }
+    }
+  }, {
+    key: '_handleReply',
+    value: function _handleReply(reply, next) {
+      var id = reply.id;
+      var result = reply.result;
+
+      if (!(id in this._callbacks)) {
+        next();
+        return;
+      }
+      var callbacks = this._callbacks[id];
+      clearTimeout(this._callbacks[id].timeout);
+      delete this._callbacks[id];
+
+      if (!(0, _utils.errorExists)(reply)) {
+        var callback = callbacks.callback;
+        if (!callback) {
+          return;
+        }
+        callback({ result: result, next: next });
+      } else {
+        var errback = callbacks.errback;
+        if (!errback) {
+          next();
+          return;
+        }
+        var error = reply.error;
+        errback({ error: error, next: next });
+      }
+    }
+  }, {
+    key: '_handleJoin',
+    value: function _handleJoin(channel, join) {
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      sub.emit('join', { 'info': join.info });
+    }
+  }, {
+    key: '_handleLeave',
+    value: function _handleLeave(channel, leave) {
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      sub.emit('leave', { 'info': leave.info });
+    }
+  }, {
+    key: '_handleUnsub',
+    value: function _handleUnsub(channel, unsub) {
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      sub.unsubscribe();
+      if (unsub.resubscribe === true) {
+        sub.subscribe();
+      }
+    }
+  }, {
+    key: '_handlePublication',
+    value: function _handlePublication(channel, pub) {
+      var sub = this._getSub(channel);
+      if (!sub) {
+        return;
+      }
+      if (pub.seq !== undefined) {
+        this._lastSeq[channel] = pub.seq;
+      }
+      if (pub.gen !== undefined) {
+        this._lastGen[channel] = pub.gen;
+      }
+      sub.emit('publish', pub);
+    }
+  }, {
+    key: '_handleMessage',
+    value: function _handleMessage(message) {
+      this.emit('message', message.data);
+    }
+  }, {
+    key: '_handlePush',
+    value: function _handlePush(data, next) {
+      var push = this._decoder.decodePush(data);
+      var type = 0;
+      if ('type' in push) {
+        type = push['type'];
+      }
+      var channel = push.channel;
+
+      if (type === this._pushType.PUBLICATION) {
+        var pub = this._decoder.decodePushData(this._pushType.PUBLICATION, push.data);
+        this._handlePublication(channel, pub);
+      } else if (type === this._pushType.MESSAGE) {
+        var message = this._decoder.decodePushData(this._pushType.MESSAGE, push.data);
+        this._handleMessage(message);
+      } else if (type === this._pushType.JOIN) {
+        var join = this._decoder.decodePushData(this._pushType.JOIN, push.data);
+        this._handleJoin(channel, join);
+      } else if (type === this._pushType.LEAVE) {
+        var leave = this._decoder.decodePushData(this._pushType.LEAVE, push.data);
+        this._handleLeave(channel, leave);
+      } else if (type === this._pushType.UNSUB) {
+        var unsub = this._decoder.decodePushData(this._pushType.UNSUB, push.data);
+        this._handleUnsub(channel, unsub);
+      }
+      next();
+    }
+  }, {
+    key: '_dispatchReply',
+    value: function _dispatchReply(reply) {
+      var next;
+      var p = new Promise(function (resolve) {
+        next = resolve;
+      });
+
+      if (reply === undefined || reply === null) {
+        this._debug('dispatch: got undefined or null reply');
+        next();
+        return p;
+      }
+
+      var id = reply.id;
+
+      if (id && id > 0) {
+        this._handleReply(reply, next);
+      } else {
+        this._handlePush(reply.result, next);
+      }
+
+      return p;
+    }
+  }, {
+    key: '_flush',
+    value: function _flush() {
+      var messages = this._messages.slice(0);
+      this._messages = [];
+      this._transportSend(messages);
+    }
+  }, {
+    key: '_ping',
+    value: function _ping() {
+      var _this17 = this;
+
+      var msg = {
+        method: this._methodType.PING
+      };
+      this._call(msg).then(function (resolveCtx) {
+        _this17._pingResponse(_this17._decoder.decodeCommandResult(_this17._methodType.PING, resolveCtx.result));
+        if (resolveCtx.next) {
+          resolveCtx.next();
+        }
+      }, function (rejectCtx) {
+        _this17._debug('ping error', rejectCtx.error);
+        if (rejectCtx.next) {
+          rejectCtx.next();
+        }
+      });
+    }
+  }, {
+    key: '_pingResponse',
+    value: function _pingResponse(result) {
+      if (!this.isConnected()) {
+        return;
+      }
+      this._stopPing();
+      this._startPing();
+    }
+  }, {
+    key: '_getLastSeq',
+    value: function _getLastSeq(channel) {
+      var lastSeq = this._lastSeq[channel];
+      if (lastSeq) {
+        return lastSeq;
+      }
+      return 0;
+    }
+  }, {
+    key: '_getLastGen',
+    value: function _getLastGen(channel) {
+      var lastGen = this._lastGen[channel];
+      if (lastGen) {
+        return lastGen;
+      }
+      return 0;
+    }
+  }, {
+    key: '_getLastEpoch',
+    value: function _getLastEpoch(channel) {
+      var lastEpoch = this._lastEpoch[channel];
+      if (lastEpoch) {
+        return lastEpoch;
+      }
+      return '';
+    }
+  }, {
+    key: '_createErrorObject',
+    value: function _createErrorObject(message, code) {
+      var errObject = {
+        message: message,
+        code: code || 0
+      };
+
+      return errObject;
+    }
+  }, {
+    key: '_registerCall',
+    value: function _registerCall(id, callback, errback) {
+      var _this18 = this;
+
+      this._callbacks[id] = {
+        callback: callback,
+        errback: errback,
+        timeout: null
+      };
+      this._callbacks[id].timeout = setTimeout(function () {
+        delete _this18._callbacks[id];
+        if ((0, _utils.isFunction)(errback)) {
+          errback({ error: _this18._createErrorObject(_errorTimeout) });
+        }
+      }, this._config.timeout);
+    }
+  }, {
+    key: '_addMessage',
+    value: function _addMessage(message) {
+      var id = this._nextMessageId();
+      message.id = id;
+      if (this._isBatching === true) {
+        this._messages.push(message);
+      } else {
+        this._transportSend([message]);
+      }
+      return id;
+    }
+  }, {
+    key: 'isConnected',
+    value: function isConnected() {
+      return this._isConnected();
+    }
+  }, {
+    key: 'connect',
+    value: function connect() {
+      this._connect();
+    }
+  }, {
+    key: 'disconnect',
+    value: function disconnect() {
+      this._disconnect('client', false);
+    }
+  }, {
+    key: 'ping',
+    value: function ping() {
+      return this._ping();
+    }
+  }, {
+    key: 'startBatching',
+    value: function startBatching() {
+      // start collecting messages without sending them to Centrifuge until flush
+      // method called
+      this._isBatching = true;
+    }
+  }, {
+    key: 'stopBatching',
+    value: function stopBatching() {
+      this._isBatching = false;
+      this._flush();
+    }
+  }, {
+    key: 'startSubscribeBatching',
+    value: function startSubscribeBatching() {
+      // start collecting private channels to create bulk authentication
+      // request to subscribeEndpoint when stopSubscribeBatching will be called
+      this._isSubscribeBatching = true;
+    }
+  }, {
+    key: 'stopSubscribeBatching',
+    value: function stopSubscribeBatching() {
+      var _this19 = this;
+
+      // create request to subscribeEndpoint with collected private channels
+      // to ask if this client can subscribe on each channel
+      this._isSubscribeBatching = false;
+      var authChannels = this._privateChannels;
+      this._privateChannels = {};
+
+      var channels = [];
+
+      for (var channel in authChannels) {
+        if (authChannels.hasOwnProperty(channel)) {
+          var sub = this._getSub(channel);
+          if (!sub) {
+            continue;
+          }
+          channels.push(channel);
+        }
+      }
+
+      if (channels.length === 0) {
+        this._debug('no private channels found, no need to make request');
+        return;
+      }
+
+      var data = {
+        client: this._clientID,
+        channels: channels
+      };
+
+      var clientID = this._clientID;
+      var xhrID = this._newXHRID();
+
+      var cb = function cb(resp) {
+        if (xhrID in _this19._xhrs) {
+          delete _this19._xhrs[xhrID];
+        }
+        if (_this19._clientID !== clientID) {
+          return;
+        }
+        if (resp.error || resp.status !== 200) {
+          _this19._debug('authorization request failed');
+          for (var i in channels) {
+            if (channels.hasOwnProperty(i)) {
+              var _channel2 = channels[i];
+              _this19._subscribeError(_channel2, _this19._createErrorObject('authorization request failed'));
+            }
+          }
+          return;
+        }
+
+        var channelsData = {};
+        if (resp.data.channels) {
+          for (var _i in resp.data.channels) {
+            var channelData = resp.data.channels[_i];
+            if (!channelData.channel) {
+              continue;
+            }
+            channelsData[channelData.channel] = channelData.token;
+          }
+        }
+
+        // try to send all subscriptions in one request.
+        var batch = false;
+
+        if (!_this19._isBatching) {
+          _this19.startBatching();
+          batch = true;
+        }
+
+        for (var _i2 in channels) {
+          if (channels.hasOwnProperty(_i2)) {
+            var _ret2 = function () {
+              var channel = channels[_i2];
+              var token = channelsData[channel];
+
+              if (!token) {
+                // subscription:error
+                _this19._subscribeError(channel, _this19._createErrorObject('permission denied', 103));
+                return 'continue';
+              } else {
+                var msg = {
+                  method: _this19._methodType.SUBSCRIBE,
+                  params: {
+                    channel: channel,
+                    token: token
+                  }
+                };
+
+                var _sub = _this19._getSub(channel);
+                if (_sub === null) {
+                  return 'continue';
+                }
+
+                var recover = _sub._needRecover();
+
+                if (recover === true) {
+                  msg.params.recover = true;
+                  var seq = _this19._getLastSeq(channel);
+                  if (seq) {
+                    msg.params.seq = seq;
+                  }
+                  var gen = _this19._getLastGen(channel);
+                  if (gen) {
+                    msg.params.gen = gen;
+                  }
+                  var epoch = _this19._getLastEpoch(channel);
+                  if (epoch) {
+                    msg.params.epoch = epoch;
+                  }
+                }
+                _this19._call(msg).then(function (resolveCtx) {
+                  _this19._subscribeResponse(channel, recover, _this19._decoder.decodeCommandResult(_this19._methodType.SUBSCRIBE, resolveCtx.result));
+                  if (resolveCtx.next) {
+                    resolveCtx.next();
+                  }
+                }, function (rejectCtx) {
+                  _this19._subscribeError(channel, rejectCtx.error);
+                  if (rejectCtx.next) {
+                    rejectCtx.next();
+                  }
+                });
+              }
+            }();
+
+            if (_ret2 === 'continue') continue;
+          }
+        }
+
+        if (batch) {
+          _this19.stopBatching();
+        }
+      };
+
+      if (this._config.onPrivateSubscribe !== null) {
+        this._config.onPrivateSubscribe({
+          data: data
+        }, cb);
+      } else {
+        var xhr = this._ajax(this._config.subscribeEndpoint, this._config.subscribeParams, this._config.subscribeHeaders, data, cb);
+        this._xhrs[xhrID] = xhr;
+      }
+    }
+  }, {
+    key: 'subscribe',
+    value: function subscribe(channel, events) {
+      var currentSub = this._getSub(channel);
+      if (currentSub !== null) {
+        currentSub._setEvents(events);
+        if (currentSub._isUnsubscribed()) {
+          currentSub.subscribe();
+        }
+        return currentSub;
+      }
+      var sub = new _subscription2.default(this, channel, events);
+      this._subs[channel] = sub;
+      sub.subscribe();
+      return sub;
+    }
+  }]);
+
+  return Centrifuge;
+}(_events2.default);
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ }),
+
+/***/ 11:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = __webpack_require__(6);
+
+var _events2 = _interopRequireDefault(_events);
+
+var _utils = __webpack_require__(7);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _STATE_NEW = 0;
+var _STATE_SUBSCRIBING = 1;
+var _STATE_SUCCESS = 2;
+var _STATE_ERROR = 3;
+var _STATE_UNSUBSCRIBED = 4;
+
+var Subscription = function (_EventEmitter) {
+  _inherits(Subscription, _EventEmitter);
+
+  function Subscription(centrifuge, channel, events) {
+    _classCallCheck(this, Subscription);
+
+    var _this = _possibleConstructorReturn(this, (Subscription.__proto__ || Object.getPrototypeOf(Subscription)).call(this));
+
+    _this.channel = channel;
+    _this._centrifuge = centrifuge;
+    _this._status = _STATE_NEW;
+    _this._error = null;
+    _this._isResubscribe = false;
+    _this._ready = false;
+    _this._subscriptionPromise = null;
+    _this._noResubscribe = false;
+    _this._recoverable = false;
+    _this._recover = false;
+    _this._setEvents(events);
+    _this._initializePromise();
+    _this._promises = {};
+    _this._promiseId = 0;
+    _this.on('error', function (errContext) {
+      this._centrifuge._debug('subscription error', errContext);
+    });
+    return _this;
+  }
+
+  _createClass(Subscription, [{
+    key: '_nextPromiseId',
+    value: function _nextPromiseId() {
+      return ++this._promiseId;
+    }
+  }, {
+    key: '_initializePromise',
+    value: function _initializePromise() {
+      var _this2 = this;
+
+      // this helps us to wait until subscription will successfully
+      // subscribe and call actions such as presence, history etc in
+      // synchronous way.
+      this._ready = false;
+
+      this._subscriptionPromise = new Promise(function (resolve, reject) {
+        _this2._resolve = function (value) {
+          _this2._ready = true;
+          resolve(value);
+        };
+        _this2._reject = function (err) {
+          _this2._ready = true;
+          reject(err);
+        };
+      }).then(function () {}, function () {});
+    }
+  }, {
+    key: '_needRecover',
+    value: function _needRecover() {
+      return this._recoverable === true && this._recover === true;
+    }
+  }, {
+    key: '_setEvents',
+    value: function _setEvents(events) {
+      if (!events) {
+        return;
+      }
+      if ((0, _utils.isFunction)(events)) {
+        // events is just a function to handle publication received from channel.
+        this.on('publish', events);
+      } else if (Object.prototype.toString.call(events) === Object.prototype.toString.call({})) {
+        var knownEvents = ['publish', 'join', 'leave', 'unsubscribe', 'subscribe', 'error'];
+        for (var i = 0, l = knownEvents.length; i < l; i++) {
+          var ev = knownEvents[i];
+          if (ev in events) {
+            this.on(ev, events[ev]);
+          }
+        }
+      }
+    }
+  }, {
+    key: '_isNew',
+    value: function _isNew() {
+      return this._status === _STATE_NEW;
+    }
+  }, {
+    key: '_isUnsubscribed',
+    value: function _isUnsubscribed() {
+      return this._status === _STATE_UNSUBSCRIBED;
+    }
+  }, {
+    key: '_isSubscribing',
+    value: function _isSubscribing() {
+      return this._status === _STATE_SUBSCRIBING;
+    }
+  }, {
+    key: '_isReady',
+    value: function _isReady() {
+      return this._status === _STATE_SUCCESS || this._status === _STATE_ERROR;
+    }
+  }, {
+    key: '_isSuccess',
+    value: function _isSuccess() {
+      return this._status === _STATE_SUCCESS;
+    }
+  }, {
+    key: '_isError',
+    value: function _isError() {
+      return this._status === _STATE_ERROR;
+    }
+  }, {
+    key: '_setNew',
+    value: function _setNew() {
+      this._status = _STATE_NEW;
+    }
+  }, {
+    key: '_setSubscribing',
+    value: function _setSubscribing(isResubscribe) {
+      this._isResubscribe = isResubscribe || false;
+      if (this._ready === true) {
+        // new promise for this subscription
+        this._initializePromise();
+      }
+      this._status = _STATE_SUBSCRIBING;
+    }
+  }, {
+    key: '_setSubscribeSuccess',
+    value: function _setSubscribeSuccess(recovered) {
+      if (this._status === _STATE_SUCCESS) {
+        return;
+      }
+      this._status = _STATE_SUCCESS;
+      var successContext = this._getSubscribeSuccessContext(recovered);
+
+      this._recover = false;
+      this.emit('subscribe', successContext);
+      this._resolve(successContext);
+      for (var id in this._promises) {
+        clearTimeout(this._promises[id].timeout);
+        this._promises[id].resolve();
+        delete this._promises[id];
+      }
+    }
+  }, {
+    key: '_setSubscribeError',
+    value: function _setSubscribeError(err) {
+      if (this._status === _STATE_ERROR) {
+        return;
+      }
+      this._status = _STATE_ERROR;
+      this._error = err;
+      var errContext = this._getSubscribeErrorContext();
+      this.emit('error', errContext);
+      this._reject(errContext);
+      for (var id in this._promises) {
+        clearTimeout(this._promises[id].timeout);
+        this._promises[id].reject(err);
+        delete this._promises[id];
+      }
+    }
+  }, {
+    key: '_triggerUnsubscribe',
+    value: function _triggerUnsubscribe() {
+      this.emit('unsubscribe', {
+        channel: this.channel
+      });
+    }
+  }, {
+    key: '_setUnsubscribed',
+    value: function _setUnsubscribed(noResubscribe) {
+      this._centrifuge._clearSubRefreshTimeout(this.channel);
+      if (this._status === _STATE_UNSUBSCRIBED) {
+        return;
+      }
+      var needTrigger = this._status === _STATE_SUCCESS;
+      this._status = _STATE_UNSUBSCRIBED;
+      if (noResubscribe === true) {
+        this._recover = false;
+        this._noResubscribe = true;
+        delete this._centrifuge._lastSeq[this.channel];
+        delete this._centrifuge._lastGen[this.channel];
+        delete this._centrifuge._lastEpoch[this.channel];
+      }
+      if (needTrigger) {
+        this._triggerUnsubscribe();
+      }
+    }
+  }, {
+    key: '_shouldResubscribe',
+    value: function _shouldResubscribe() {
+      return !this._noResubscribe;
+    }
+  }, {
+    key: '_getSubscribeSuccessContext',
+    value: function _getSubscribeSuccessContext(recovered) {
+      return {
+        channel: this.channel,
+        isResubscribe: this._isResubscribe,
+        recovered: recovered
+      };
+    }
+  }, {
+    key: '_getSubscribeErrorContext',
+    value: function _getSubscribeErrorContext() {
+      var subscribeErrorContext = this._error;
+      subscribeErrorContext.channel = this.channel;
+      subscribeErrorContext.isResubscribe = this._isResubscribe;
+      return subscribeErrorContext;
+    }
+  }, {
+    key: 'ready',
+    value: function ready(callback, errback) {
+      if (this._ready) {
+        if (this._isSuccess()) {
+          callback(this._getSubscribeSuccessContext());
+        } else {
+          errback(this._getSubscribeErrorContext());
+        }
+      }
+    }
+  }, {
+    key: 'subscribe',
+    value: function subscribe() {
+      if (this._status === _STATE_SUCCESS) {
+        return;
+      }
+      this._noResubscribe = false;
+      this._centrifuge._subscribe(this);
+    }
+  }, {
+    key: 'unsubscribe',
+    value: function unsubscribe() {
+      this._setUnsubscribed(true);
+      this._centrifuge._unsubscribe(this);
+    }
+  }, {
+    key: '_methodCall',
+    value: function _methodCall(message, type) {
+      var _this3 = this;
+
+      var methodCallPromise = new Promise(function (resolve, reject) {
+        var subPromise = void 0;
+        if (_this3._isSuccess()) {
+          subPromise = Promise.resolve();
+        } else if (_this3._isError()) {
+          subPromise = Promise.reject(_this3._error);
+        } else {
+          subPromise = new Promise(function (res, rej) {
+            var timeout = setTimeout(function () {
+              rej({ 'code': 0, 'message': 'timeout' });
+            }, _this3._centrifuge._config.timeout);
+            _this3._promises[_this3._nextPromiseId()] = {
+              timeout: timeout,
+              resolve: res,
+              reject: rej
+            };
+          });
+        }
+        subPromise.then(function () {
+          return _this3._centrifuge._call(message).then(function (resolveCtx) {
+            resolve(_this3._centrifuge._decoder.decodeCommandResult(type, resolveCtx.result));
+            if (resolveCtx.next) {
+              resolveCtx.next();
+            }
+          }, function (rejectCtx) {
+            reject(rejectCtx.error);
+            if (rejectCtx.next) {
+              rejectCtx.next();
+            }
+          });
+        }, function (error) {
+          reject(error);
+        });
+      });
+      return methodCallPromise;
+    }
+  }, {
+    key: 'publish',
+    value: function publish(data) {
+      return this._methodCall({
+        method: this._centrifuge._methodType.PUBLISH,
+        params: {
+          channel: this.channel,
+          data: data
+        }
+      }, this._centrifuge._methodType.PUBLISH);
+    }
+  }, {
+    key: 'presence',
+    value: function presence() {
+      return this._methodCall({
+        method: this._centrifuge._methodType.PRESENCE,
+        params: {
+          channel: this.channel
+        }
+      }, this._centrifuge._methodType.PRESENCE);
+    }
+  }, {
+    key: 'presenceStats',
+    value: function presenceStats() {
+      return this._methodCall({
+        method: this._centrifuge._methodType.PRESENCE_STATS,
+        params: {
+          channel: this.channel
+        }
+      }, this._centrifuge._methodType.PRESENCE_STATS);
+    }
+  }, {
+    key: 'history',
+    value: function history() {
+      return this._methodCall({
+        method: this._centrifuge._methodType.HISTORY,
+        params: {
+          channel: this.channel
+        }
+      }, this._centrifuge._methodType.HISTORY);
+    }
+  }]);
+
+  return Subscription;
+}(_events2.default);
+
+exports.default = Subscription;
+module.exports = exports['default'];
+
+/***/ }),
+
+/***/ 12:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var JsonMethodType = exports.JsonMethodType = {
+  CONNECT: 0,
+  SUBSCRIBE: 1,
+  UNSUBSCRIBE: 2,
+  PUBLISH: 3,
+  PRESENCE: 4,
+  PRESENCE_STATS: 5,
+  HISTORY: 6,
+  PING: 7,
+  SEND: 8,
+  RPC: 9,
+  REFRESH: 10,
+  SUB_REFRESH: 11
+};
+
+var JsonPushType = exports.JsonPushType = {
+  PUBLICATION: 0,
+  JOIN: 1,
+  LEAVE: 2,
+  UNSUB: 3,
+  MESSAGE: 4
+};
+
+var JsonEncoder = exports.JsonEncoder = function () {
+  function JsonEncoder() {
+    _classCallCheck(this, JsonEncoder);
+  }
+
+  _createClass(JsonEncoder, [{
+    key: 'encodeCommands',
+    value: function encodeCommands(commands) {
+      var encodedCommands = [];
+      for (var i in commands) {
+        if (commands.hasOwnProperty(i)) {
+          encodedCommands.push(JSON.stringify(commands[i]));
+        }
+      }
+      return encodedCommands.join('\n');
+    }
+  }]);
+
+  return JsonEncoder;
+}();
+
+var JsonDecoder = exports.JsonDecoder = function () {
+  function JsonDecoder() {
+    _classCallCheck(this, JsonDecoder);
+  }
+
+  _createClass(JsonDecoder, [{
+    key: 'decodeReplies',
+    value: function decodeReplies(data) {
+      var replies = [];
+      var encodedReplies = data.split('\n');
+      for (var i in encodedReplies) {
+        if (encodedReplies.hasOwnProperty(i)) {
+          if (!encodedReplies[i]) {
+            continue;
+          }
+          var reply = JSON.parse(encodedReplies[i]);
+          replies.push(reply);
+        }
+      }
+      return replies;
+    }
+  }, {
+    key: 'decodeCommandResult',
+    value: function decodeCommandResult(methodType, data) {
+      return data;
+    }
+  }, {
+    key: 'decodePush',
+    value: function decodePush(data) {
+      return data;
+    }
+  }, {
+    key: 'decodePushData',
+    value: function decodePushData(pushType, data) {
+      return data;
+    }
+  }]);
+
+  return JsonDecoder;
+}();
+
+/***/ }),
+
+/***/ 3:
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+
+/***/ 31:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _centrifuge = __webpack_require__(10);
+
+exports.default = _centrifuge.Centrifuge;
+module.exports = exports['default'];
+
+/***/ }),
+
+/***/ 6:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+var R = typeof Reflect === 'object' ? Reflect : null
+var ReflectApply = R && typeof R.apply === 'function'
+  ? R.apply
+  : function ReflectApply(target, receiver, args) {
+    return Function.prototype.apply.call(target, receiver, args);
+  }
+
+var ReflectOwnKeys
+if (R && typeof R.ownKeys === 'function') {
+  ReflectOwnKeys = R.ownKeys
+} else if (Object.getOwnPropertySymbols) {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target)
+      .concat(Object.getOwnPropertySymbols(target));
+  };
+} else {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target);
+  };
+}
+
+function ProcessEmitWarning(warning) {
+  if (console && console.warn) console.warn(warning);
+}
+
+var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
+  return value !== value;
+}
+
+function EventEmitter() {
+  EventEmitter.init.call(this);
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._eventsCount = 0;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+var defaultMaxListeners = 10;
+
+Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+  enumerable: true,
+  get: function() {
+    return defaultMaxListeners;
+  },
+  set: function(arg) {
+    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
+    }
+    defaultMaxListeners = arg;
+  }
+});
+
+EventEmitter.init = function() {
+
+  if (this._events === undefined ||
+      this._events === Object.getPrototypeOf(this)._events) {
+    this._events = Object.create(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+};
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
+  }
+  this._maxListeners = n;
+  return this;
+};
+
+function $getMaxListeners(that) {
+  if (that._maxListeners === undefined)
+    return EventEmitter.defaultMaxListeners;
+  return that._maxListeners;
+}
+
+EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
+  return $getMaxListeners(this);
+};
+
+EventEmitter.prototype.emit = function emit(type) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
+  var doError = (type === 'error');
+
+  var events = this._events;
+  if (events !== undefined)
+    doError = (doError && events.error === undefined);
+  else if (!doError)
+    return false;
+
+  // If there is no 'error' event listener then throw.
+  if (doError) {
+    var er;
+    if (args.length > 0)
+      er = args[0];
+    if (er instanceof Error) {
+      // Note: The comments on the `throw` lines are intentional, they show
+      // up in Node's output if this results in an unhandled exception.
+      throw er; // Unhandled 'error' event
+    }
+    // At least give some kind of context to the user
+    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+    err.context = er;
+    throw err; // Unhandled 'error' event
+  }
+
+  var handler = events[type];
+
+  if (handler === undefined)
+    return false;
+
+  if (typeof handler === 'function') {
+    ReflectApply(handler, this, args);
+  } else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      ReflectApply(listeners[i], this, args);
+  }
+
+  return true;
+};
+
+function _addListener(target, type, listener, prepend) {
+  var m;
+  var events;
+  var existing;
+
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+
+  events = target._events;
+  if (events === undefined) {
+    events = target._events = Object.create(null);
+    target._eventsCount = 0;
+  } else {
+    // To avoid recursion in the case that type === "newListener"! Before
+    // adding it to the listeners, first emit "newListener".
+    if (events.newListener !== undefined) {
+      target.emit('newListener', type,
+                  listener.listener ? listener.listener : listener);
+
+      // Re-assign `events` because a newListener handler could have caused the
+      // this._events to be assigned to a new object
+      events = target._events;
+    }
+    existing = events[type];
+  }
+
+  if (existing === undefined) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    existing = events[type] = listener;
+    ++target._eventsCount;
+  } else {
+    if (typeof existing === 'function') {
+      // Adding the second element, need to change to array.
+      existing = events[type] =
+        prepend ? [listener, existing] : [existing, listener];
+      // If we've already got an array, just append.
+    } else if (prepend) {
+      existing.unshift(listener);
+    } else {
+      existing.push(listener);
+    }
+
+    // Check for listener leak
+    m = $getMaxListeners(target);
+    if (m > 0 && existing.length > m && !existing.warned) {
+      existing.warned = true;
+      // No error code for this since it is a Warning
+      // eslint-disable-next-line no-restricted-syntax
+      var w = new Error('Possible EventEmitter memory leak detected. ' +
+                          existing.length + ' ' + String(type) + ' listeners ' +
+                          'added. Use emitter.setMaxListeners() to ' +
+                          'increase limit');
+      w.name = 'MaxListenersExceededWarning';
+      w.emitter = target;
+      w.type = type;
+      w.count = existing.length;
+      ProcessEmitWarning(w);
+    }
+  }
+
+  return target;
+}
+
+EventEmitter.prototype.addListener = function addListener(type, listener) {
+  return _addListener(this, type, listener, false);
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.prependListener =
+    function prependListener(type, listener) {
+      return _addListener(this, type, listener, true);
+    };
+
+function onceWrapper() {
+  var args = [];
+  for (var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = true;
+    ReflectApply(this.listener, this.target, args);
+  }
+}
+
+function _onceWrap(target, type, listener) {
+  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
+  var wrapped = onceWrapper.bind(state);
+  wrapped.listener = listener;
+  state.wrapFn = wrapped;
+  return wrapped;
+}
+
+EventEmitter.prototype.once = function once(type, listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+  this.on(type, _onceWrap(this, type, listener));
+  return this;
+};
+
+EventEmitter.prototype.prependOnceListener =
+    function prependOnceListener(type, listener) {
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+      }
+      this.prependListener(type, _onceWrap(this, type, listener));
+      return this;
+    };
+
+// Emits a 'removeListener' event if and only if the listener was removed.
+EventEmitter.prototype.removeListener =
+    function removeListener(type, listener) {
+      var list, events, position, i, originalListener;
+
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+      }
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      list = events[type];
+      if (list === undefined)
+        return this;
+
+      if (list === listener || list.listener === listener) {
+        if (--this._eventsCount === 0)
+          this._events = Object.create(null);
+        else {
+          delete events[type];
+          if (events.removeListener)
+            this.emit('removeListener', type, list.listener || listener);
+        }
+      } else if (typeof list !== 'function') {
+        position = -1;
+
+        for (i = list.length - 1; i >= 0; i--) {
+          if (list[i] === listener || list[i].listener === listener) {
+            originalListener = list[i].listener;
+            position = i;
+            break;
+          }
+        }
+
+        if (position < 0)
+          return this;
+
+        if (position === 0)
+          list.shift();
+        else {
+          spliceOne(list, position);
+        }
+
+        if (list.length === 1)
+          events[type] = list[0];
+
+        if (events.removeListener !== undefined)
+          this.emit('removeListener', type, originalListener || listener);
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+EventEmitter.prototype.removeAllListeners =
+    function removeAllListeners(type) {
+      var listeners, events, i;
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      // not listening for removeListener, no need to emit
+      if (events.removeListener === undefined) {
+        if (arguments.length === 0) {
+          this._events = Object.create(null);
+          this._eventsCount = 0;
+        } else if (events[type] !== undefined) {
+          if (--this._eventsCount === 0)
+            this._events = Object.create(null);
+          else
+            delete events[type];
+        }
+        return this;
+      }
+
+      // emit removeListener for all listeners on all events
+      if (arguments.length === 0) {
+        var keys = Object.keys(events);
+        var key;
+        for (i = 0; i < keys.length; ++i) {
+          key = keys[i];
+          if (key === 'removeListener') continue;
+          this.removeAllListeners(key);
+        }
+        this.removeAllListeners('removeListener');
+        this._events = Object.create(null);
+        this._eventsCount = 0;
+        return this;
+      }
+
+      listeners = events[type];
+
+      if (typeof listeners === 'function') {
+        this.removeListener(type, listeners);
+      } else if (listeners !== undefined) {
+        // LIFO order
+        for (i = listeners.length - 1; i >= 0; i--) {
+          this.removeListener(type, listeners[i]);
+        }
+      }
+
+      return this;
+    };
+
+function _listeners(target, type, unwrap) {
+  var events = target._events;
+
+  if (events === undefined)
+    return [];
+
+  var evlistener = events[type];
+  if (evlistener === undefined)
+    return [];
+
+  if (typeof evlistener === 'function')
+    return unwrap ? [evlistener.listener || evlistener] : [evlistener];
+
+  return unwrap ?
+    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
+}
+
+EventEmitter.prototype.listeners = function listeners(type) {
+  return _listeners(this, type, true);
+};
+
+EventEmitter.prototype.rawListeners = function rawListeners(type) {
+  return _listeners(this, type, false);
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  if (typeof emitter.listenerCount === 'function') {
+    return emitter.listenerCount(type);
+  } else {
+    return listenerCount.call(emitter, type);
+  }
+};
+
+EventEmitter.prototype.listenerCount = listenerCount;
+function listenerCount(type) {
+  var events = this._events;
+
+  if (events !== undefined) {
+    var evlistener = events[type];
+
+    if (typeof evlistener === 'function') {
+      return 1;
+    } else if (evlistener !== undefined) {
+      return evlistener.length;
+    }
+  }
+
+  return 0;
+}
+
+EventEmitter.prototype.eventNames = function eventNames() {
+  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
+};
+
+function arrayClone(arr, n) {
+  var copy = new Array(n);
+  for (var i = 0; i < n; ++i)
+    copy[i] = arr[i];
+  return copy;
+}
+
+function spliceOne(list, index) {
+  for (; index + 1 < list.length; index++)
+    list[index] = list[index + 1];
+  list.pop();
+}
+
+function unwrapListeners(arr) {
+  var ret = new Array(arr.length);
+  for (var i = 0; i < ret.length; ++i) {
+    ret[i] = arr[i].listener || arr[i];
+  }
+  return ret;
+}
+
+
+/***/ }),
+
+/***/ 7:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.startsWith = startsWith;
+exports.isFunction = isFunction;
+exports.log = log;
+exports.backoff = backoff;
+exports.errorExists = errorExists;
+exports.extend = extend;
+function startsWith(value, prefix) {
+  return value.lastIndexOf(prefix, 0) === 0;
+};
+
+function isFunction(value) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  return typeof value === 'function';
+};
+
+function log(level, args) {
+  if (global.console) {
+    var logger = global.console[level];
+
+    if (isFunction(logger)) {
+      logger.apply(global.console, args);
+    }
+  }
+};
+
+function backoff(step, min, max) {
+  var jitter = 0.5 * Math.random();
+  var interval = Math.min(max, min * Math.pow(2, step + 1));
+
+  return Math.floor((1 - jitter) * interval);
+};
+
+function errorExists(data) {
+  return 'error' in data && data.error !== null;
+};
+
+function extend(a, b) {
+  for (var key in b) {
+    if (b.hasOwnProperty(key)) {
+      a[key] = b[key];
+    }
+  }
+  return a;
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ })
+
+/******/ });
+});
+//# sourceMappingURL=centrifuge.js.map
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vuetify/src/components/VAlert/VAlert.sass":
 /*!***************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/postcss-loader/src??ref--8-2!./node_modules/sass-loader/dist/cjs.js??ref--8-3!./node_modules/vuetify/src/components/VAlert/VAlert.sass ***!
@@ -9290,6 +12145,44 @@ function toComment(sourceMap) {
 	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
 
 	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/inherits/inherits_browser.js":
+/*!***************************************************!*\
+  !*** ./node_modules/inherits/inherits_browser.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    if (superCtor) {
+      ctor.super_ = superCtor
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    }
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    if (superCtor) {
+      ctor.super_ = superCtor
+      var TempCtor = function () {}
+      TempCtor.prototype = superCtor.prototype
+      ctor.prototype = new TempCtor()
+      ctor.prototype.constructor = ctor
+    }
+  }
 }
 
 
@@ -19924,6 +22817,957 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
+
+/***/ }),
+
+/***/ "./node_modules/json3/lib/json3.js":
+/*!*****************************************!*\
+  !*** ./node_modules/json3/lib/json3.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! JSON v3.3.2 | https://bestiejs.github.io/json3 | Copyright 2012-2015, Kit Cambridge, Benjamin Tan | http://kit.mit-license.org */
+;(function () {
+  // Detect the `define` function exposed by asynchronous module loaders. The
+  // strict `define` check is necessary for compatibility with `r.js`.
+  var isLoader =  true && __webpack_require__(/*! !webpack amd options */ "./node_modules/webpack/buildin/amd-options.js");
+
+  // A set of types used to distinguish objects from primitives.
+  var objectTypes = {
+    "function": true,
+    "object": true
+  };
+
+  // Detect the `exports` object exposed by CommonJS implementations.
+  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
+
+  // Use the `global` object exposed by Node (including Browserify via
+  // `insert-module-globals`), Narwhal, and Ringo as the default context,
+  // and the `window` object in browsers. Rhino exports a `global` function
+  // instead.
+  var root = objectTypes[typeof window] && window || this,
+      freeGlobal = freeExports && objectTypes[typeof module] && module && !module.nodeType && typeof global == "object" && global;
+
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
+    root = freeGlobal;
+  }
+
+  // Public: Initializes JSON 3 using the given `context` object, attaching the
+  // `stringify` and `parse` functions to the specified `exports` object.
+  function runInContext(context, exports) {
+    context || (context = root.Object());
+    exports || (exports = root.Object());
+
+    // Native constructor aliases.
+    var Number = context.Number || root.Number,
+        String = context.String || root.String,
+        Object = context.Object || root.Object,
+        Date = context.Date || root.Date,
+        SyntaxError = context.SyntaxError || root.SyntaxError,
+        TypeError = context.TypeError || root.TypeError,
+        Math = context.Math || root.Math,
+        nativeJSON = context.JSON || root.JSON;
+
+    // Delegate to the native `stringify` and `parse` implementations.
+    if (typeof nativeJSON == "object" && nativeJSON) {
+      exports.stringify = nativeJSON.stringify;
+      exports.parse = nativeJSON.parse;
+    }
+
+    // Convenience aliases.
+    var objectProto = Object.prototype,
+        getClass = objectProto.toString,
+        isProperty = objectProto.hasOwnProperty,
+        undefined;
+
+    // Internal: Contains `try...catch` logic used by other functions.
+    // This prevents other functions from being deoptimized.
+    function attempt(func, errorFunc) {
+      try {
+        func();
+      } catch (exception) {
+        if (errorFunc) {
+          errorFunc();
+        }
+      }
+    }
+
+    // Test the `Date#getUTC*` methods. Based on work by @Yaffle.
+    var isExtended = new Date(-3509827334573292);
+    attempt(function () {
+      // The `getUTCFullYear`, `Month`, and `Date` methods return nonsensical
+      // results for certain dates in Opera >= 10.53.
+      isExtended = isExtended.getUTCFullYear() == -109252 && isExtended.getUTCMonth() === 0 && isExtended.getUTCDate() === 1 &&
+        isExtended.getUTCHours() == 10 && isExtended.getUTCMinutes() == 37 && isExtended.getUTCSeconds() == 6 && isExtended.getUTCMilliseconds() == 708;
+    });
+
+    // Internal: Determines whether the native `JSON.stringify` and `parse`
+    // implementations are spec-compliant. Based on work by Ken Snyder.
+    function has(name) {
+      if (has[name] != null) {
+        // Return cached feature test result.
+        return has[name];
+      }
+      var isSupported;
+      if (name == "bug-string-char-index") {
+        // IE <= 7 doesn't support accessing string characters using square
+        // bracket notation. IE 8 only supports this for primitives.
+        isSupported = "a"[0] != "a";
+      } else if (name == "json") {
+        // Indicates whether both `JSON.stringify` and `JSON.parse` are
+        // supported.
+        isSupported = has("json-stringify") && has("date-serialization") && has("json-parse");
+      } else if (name == "date-serialization") {
+        // Indicates whether `Date`s can be serialized accurately by `JSON.stringify`.
+        isSupported = has("json-stringify") && isExtended;
+        if (isSupported) {
+          var stringify = exports.stringify;
+          attempt(function () {
+            isSupported =
+              // JSON 2, Prototype <= 1.7, and older WebKit builds incorrectly
+              // serialize extended years.
+              stringify(new Date(-8.64e15)) == '"-271821-04-20T00:00:00.000Z"' &&
+              // The milliseconds are optional in ES 5, but required in 5.1.
+              stringify(new Date(8.64e15)) == '"+275760-09-13T00:00:00.000Z"' &&
+              // Firefox <= 11.0 incorrectly serializes years prior to 0 as negative
+              // four-digit years instead of six-digit years. Credits: @Yaffle.
+              stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' &&
+              // Safari <= 5.1.5 and Opera >= 10.53 incorrectly serialize millisecond
+              // values less than 1000. Credits: @Yaffle.
+              stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
+          });
+        }
+      } else {
+        var value, serialized = '{"a":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}';
+        // Test `JSON.stringify`.
+        if (name == "json-stringify") {
+          var stringify = exports.stringify, stringifySupported = typeof stringify == "function";
+          if (stringifySupported) {
+            // A test function object with a custom `toJSON` method.
+            (value = function () {
+              return 1;
+            }).toJSON = value;
+            attempt(function () {
+              stringifySupported =
+                // Firefox 3.1b1 and b2 serialize string, number, and boolean
+                // primitives as object literals.
+                stringify(0) === "0" &&
+                // FF 3.1b1, b2, and JSON 2 serialize wrapped primitives as object
+                // literals.
+                stringify(new Number()) === "0" &&
+                stringify(new String()) == '""' &&
+                // FF 3.1b1, 2 throw an error if the value is `null`, `undefined`, or
+                // does not define a canonical JSON representation (this applies to
+                // objects with `toJSON` properties as well, *unless* they are nested
+                // within an object or array).
+                stringify(getClass) === undefined &&
+                // IE 8 serializes `undefined` as `"undefined"`. Safari <= 5.1.7 and
+                // FF 3.1b3 pass this test.
+                stringify(undefined) === undefined &&
+                // Safari <= 5.1.7 and FF 3.1b3 throw `Error`s and `TypeError`s,
+                // respectively, if the value is omitted entirely.
+                stringify() === undefined &&
+                // FF 3.1b1, 2 throw an error if the given value is not a number,
+                // string, array, object, Boolean, or `null` literal. This applies to
+                // objects with custom `toJSON` methods as well, unless they are nested
+                // inside object or array literals. YUI 3.0.0b1 ignores custom `toJSON`
+                // methods entirely.
+                stringify(value) === "1" &&
+                stringify([value]) == "[1]" &&
+                // Prototype <= 1.6.1 serializes `[undefined]` as `"[]"` instead of
+                // `"[null]"`.
+                stringify([undefined]) == "[null]" &&
+                // YUI 3.0.0b1 fails to serialize `null` literals.
+                stringify(null) == "null" &&
+                // FF 3.1b1, 2 halts serialization if an array contains a function:
+                // `[1, true, getClass, 1]` serializes as "[1,true,],". FF 3.1b3
+                // elides non-JSON values from objects and arrays, unless they
+                // define custom `toJSON` methods.
+                stringify([undefined, getClass, null]) == "[null,null,null]" &&
+                // Simple serialization test. FF 3.1b1 uses Unicode escape sequences
+                // where character escape codes are expected (e.g., `\b` => `\u0008`).
+                stringify({ "a": [value, true, false, null, "\x00\b\n\f\r\t"] }) == serialized &&
+                // FF 3.1b1 and b2 ignore the `filter` and `width` arguments.
+                stringify(null, value) === "1" &&
+                stringify([1, 2], null, 1) == "[\n 1,\n 2\n]";
+            }, function () {
+              stringifySupported = false;
+            });
+          }
+          isSupported = stringifySupported;
+        }
+        // Test `JSON.parse`.
+        if (name == "json-parse") {
+          var parse = exports.parse, parseSupported;
+          if (typeof parse == "function") {
+            attempt(function () {
+              // FF 3.1b1, b2 will throw an exception if a bare literal is provided.
+              // Conforming implementations should also coerce the initial argument to
+              // a string prior to parsing.
+              if (parse("0") === 0 && !parse(false)) {
+                // Simple parsing test.
+                value = parse(serialized);
+                parseSupported = value["a"].length == 5 && value["a"][0] === 1;
+                if (parseSupported) {
+                  attempt(function () {
+                    // Safari <= 5.1.2 and FF 3.1b1 allow unescaped tabs in strings.
+                    parseSupported = !parse('"\t"');
+                  });
+                  if (parseSupported) {
+                    attempt(function () {
+                      // FF 4.0 and 4.0.1 allow leading `+` signs and leading
+                      // decimal points. FF 4.0, 4.0.1, and IE 9-10 also allow
+                      // certain octal literals.
+                      parseSupported = parse("01") !== 1;
+                    });
+                  }
+                  if (parseSupported) {
+                    attempt(function () {
+                      // FF 4.0, 4.0.1, and Rhino 1.7R3-R4 allow trailing decimal
+                      // points. These environments, along with FF 3.1b1 and 2,
+                      // also allow trailing commas in JSON objects and arrays.
+                      parseSupported = parse("1.") !== 1;
+                    });
+                  }
+                }
+              }
+            }, function () {
+              parseSupported = false;
+            });
+          }
+          isSupported = parseSupported;
+        }
+      }
+      return has[name] = !!isSupported;
+    }
+    has["bug-string-char-index"] = has["date-serialization"] = has["json"] = has["json-stringify"] = has["json-parse"] = null;
+
+    if (!has("json")) {
+      // Common `[[Class]]` name aliases.
+      var functionClass = "[object Function]",
+          dateClass = "[object Date]",
+          numberClass = "[object Number]",
+          stringClass = "[object String]",
+          arrayClass = "[object Array]",
+          booleanClass = "[object Boolean]";
+
+      // Detect incomplete support for accessing string characters by index.
+      var charIndexBuggy = has("bug-string-char-index");
+
+      // Internal: Normalizes the `for...in` iteration algorithm across
+      // environments. Each enumerated key is yielded to a `callback` function.
+      var forOwn = function (object, callback) {
+        var size = 0, Properties, dontEnums, property;
+
+        // Tests for bugs in the current environment's `for...in` algorithm. The
+        // `valueOf` property inherits the non-enumerable flag from
+        // `Object.prototype` in older versions of IE, Netscape, and Mozilla.
+        (Properties = function () {
+          this.valueOf = 0;
+        }).prototype.valueOf = 0;
+
+        // Iterate over a new instance of the `Properties` class.
+        dontEnums = new Properties();
+        for (property in dontEnums) {
+          // Ignore all properties inherited from `Object.prototype`.
+          if (isProperty.call(dontEnums, property)) {
+            size++;
+          }
+        }
+        Properties = dontEnums = null;
+
+        // Normalize the iteration algorithm.
+        if (!size) {
+          // A list of non-enumerable properties inherited from `Object.prototype`.
+          dontEnums = ["valueOf", "toString", "toLocaleString", "propertyIsEnumerable", "isPrototypeOf", "hasOwnProperty", "constructor"];
+          // IE <= 8, Mozilla 1.0, and Netscape 6.2 ignore shadowed non-enumerable
+          // properties.
+          forOwn = function (object, callback) {
+            var isFunction = getClass.call(object) == functionClass, property, length;
+            var hasProperty = !isFunction && typeof object.constructor != "function" && objectTypes[typeof object.hasOwnProperty] && object.hasOwnProperty || isProperty;
+            for (property in object) {
+              // Gecko <= 1.0 enumerates the `prototype` property of functions under
+              // certain conditions; IE does not.
+              if (!(isFunction && property == "prototype") && hasProperty.call(object, property)) {
+                callback(property);
+              }
+            }
+            // Manually invoke the callback for each non-enumerable property.
+            for (length = dontEnums.length; property = dontEnums[--length];) {
+              if (hasProperty.call(object, property)) {
+                callback(property);
+              }
+            }
+          };
+        } else {
+          // No bugs detected; use the standard `for...in` algorithm.
+          forOwn = function (object, callback) {
+            var isFunction = getClass.call(object) == functionClass, property, isConstructor;
+            for (property in object) {
+              if (!(isFunction && property == "prototype") && isProperty.call(object, property) && !(isConstructor = property === "constructor")) {
+                callback(property);
+              }
+            }
+            // Manually invoke the callback for the `constructor` property due to
+            // cross-environment inconsistencies.
+            if (isConstructor || isProperty.call(object, (property = "constructor"))) {
+              callback(property);
+            }
+          };
+        }
+        return forOwn(object, callback);
+      };
+
+      // Public: Serializes a JavaScript `value` as a JSON string. The optional
+      // `filter` argument may specify either a function that alters how object and
+      // array members are serialized, or an array of strings and numbers that
+      // indicates which properties should be serialized. The optional `width`
+      // argument may be either a string or number that specifies the indentation
+      // level of the output.
+      if (!has("json-stringify") && !has("date-serialization")) {
+        // Internal: A map of control characters and their escaped equivalents.
+        var Escapes = {
+          92: "\\\\",
+          34: '\\"',
+          8: "\\b",
+          12: "\\f",
+          10: "\\n",
+          13: "\\r",
+          9: "\\t"
+        };
+
+        // Internal: Converts `value` into a zero-padded string such that its
+        // length is at least equal to `width`. The `width` must be <= 6.
+        var leadingZeroes = "000000";
+        var toPaddedString = function (width, value) {
+          // The `|| 0` expression is necessary to work around a bug in
+          // Opera <= 7.54u2 where `0 == -0`, but `String(-0) !== "0"`.
+          return (leadingZeroes + (value || 0)).slice(-width);
+        };
+
+        // Internal: Serializes a date object.
+        var serializeDate = function (value) {
+          var getData, year, month, date, time, hours, minutes, seconds, milliseconds;
+          // Define additional utility methods if the `Date` methods are buggy.
+          if (!isExtended) {
+            var floor = Math.floor;
+            // A mapping between the months of the year and the number of days between
+            // January 1st and the first of the respective month.
+            var Months = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            // Internal: Calculates the number of days between the Unix epoch and the
+            // first day of the given month.
+            var getDay = function (year, month) {
+              return Months[month] + 365 * (year - 1970) + floor((year - 1969 + (month = +(month > 1))) / 4) - floor((year - 1901 + month) / 100) + floor((year - 1601 + month) / 400);
+            };
+            getData = function (value) {
+              // Manually compute the year, month, date, hours, minutes,
+              // seconds, and milliseconds if the `getUTC*` methods are
+              // buggy. Adapted from @Yaffle's `date-shim` project.
+              date = floor(value / 864e5);
+              for (year = floor(date / 365.2425) + 1970 - 1; getDay(year + 1, 0) <= date; year++);
+              for (month = floor((date - getDay(year, 0)) / 30.42); getDay(year, month + 1) <= date; month++);
+              date = 1 + date - getDay(year, month);
+              // The `time` value specifies the time within the day (see ES
+              // 5.1 section 15.9.1.2). The formula `(A % B + B) % B` is used
+              // to compute `A modulo B`, as the `%` operator does not
+              // correspond to the `modulo` operation for negative numbers.
+              time = (value % 864e5 + 864e5) % 864e5;
+              // The hours, minutes, seconds, and milliseconds are obtained by
+              // decomposing the time within the day. See section 15.9.1.10.
+              hours = floor(time / 36e5) % 24;
+              minutes = floor(time / 6e4) % 60;
+              seconds = floor(time / 1e3) % 60;
+              milliseconds = time % 1e3;
+            };
+          } else {
+            getData = function (value) {
+              year = value.getUTCFullYear();
+              month = value.getUTCMonth();
+              date = value.getUTCDate();
+              hours = value.getUTCHours();
+              minutes = value.getUTCMinutes();
+              seconds = value.getUTCSeconds();
+              milliseconds = value.getUTCMilliseconds();
+            };
+          }
+          serializeDate = function (value) {
+            if (value > -1 / 0 && value < 1 / 0) {
+              // Dates are serialized according to the `Date#toJSON` method
+              // specified in ES 5.1 section 15.9.5.44. See section 15.9.1.15
+              // for the ISO 8601 date time string format.
+              getData(value);
+              // Serialize extended years correctly.
+              value = (year <= 0 || year >= 1e4 ? (year < 0 ? "-" : "+") + toPaddedString(6, year < 0 ? -year : year) : toPaddedString(4, year)) +
+              "-" + toPaddedString(2, month + 1) + "-" + toPaddedString(2, date) +
+              // Months, dates, hours, minutes, and seconds should have two
+              // digits; milliseconds should have three.
+              "T" + toPaddedString(2, hours) + ":" + toPaddedString(2, minutes) + ":" + toPaddedString(2, seconds) +
+              // Milliseconds are optional in ES 5.0, but required in 5.1.
+              "." + toPaddedString(3, milliseconds) + "Z";
+              year = month = date = hours = minutes = seconds = milliseconds = null;
+            } else {
+              value = null;
+            }
+            return value;
+          };
+          return serializeDate(value);
+        };
+
+        // For environments with `JSON.stringify` but buggy date serialization,
+        // we override the native `Date#toJSON` implementation with a
+        // spec-compliant one.
+        if (has("json-stringify") && !has("date-serialization")) {
+          // Internal: the `Date#toJSON` implementation used to override the native one.
+          function dateToJSON (key) {
+            return serializeDate(this);
+          }
+
+          // Public: `JSON.stringify`. See ES 5.1 section 15.12.3.
+          var nativeStringify = exports.stringify;
+          exports.stringify = function (source, filter, width) {
+            var nativeToJSON = Date.prototype.toJSON;
+            Date.prototype.toJSON = dateToJSON;
+            var result = nativeStringify(source, filter, width);
+            Date.prototype.toJSON = nativeToJSON;
+            return result;
+          }
+        } else {
+          // Internal: Double-quotes a string `value`, replacing all ASCII control
+          // characters (characters with code unit values between 0 and 31) with
+          // their escaped equivalents. This is an implementation of the
+          // `Quote(value)` operation defined in ES 5.1 section 15.12.3.
+          var unicodePrefix = "\\u00";
+          var escapeChar = function (character) {
+            var charCode = character.charCodeAt(0), escaped = Escapes[charCode];
+            if (escaped) {
+              return escaped;
+            }
+            return unicodePrefix + toPaddedString(2, charCode.toString(16));
+          };
+          var reEscape = /[\x00-\x1f\x22\x5c]/g;
+          var quote = function (value) {
+            reEscape.lastIndex = 0;
+            return '"' +
+              (
+                reEscape.test(value)
+                  ? value.replace(reEscape, escapeChar)
+                  : value
+              ) +
+              '"';
+          };
+
+          // Internal: Recursively serializes an object. Implements the
+          // `Str(key, holder)`, `JO(value)`, and `JA(value)` operations.
+          var serialize = function (property, object, callback, properties, whitespace, indentation, stack) {
+            var value, type, className, results, element, index, length, prefix, result;
+            attempt(function () {
+              // Necessary for host object support.
+              value = object[property];
+            });
+            if (typeof value == "object" && value) {
+              if (value.getUTCFullYear && getClass.call(value) == dateClass && value.toJSON === Date.prototype.toJSON) {
+                value = serializeDate(value);
+              } else if (typeof value.toJSON == "function") {
+                value = value.toJSON(property);
+              }
+            }
+            if (callback) {
+              // If a replacement function was provided, call it to obtain the value
+              // for serialization.
+              value = callback.call(object, property, value);
+            }
+            // Exit early if value is `undefined` or `null`.
+            if (value == undefined) {
+              return value === undefined ? value : "null";
+            }
+            type = typeof value;
+            // Only call `getClass` if the value is an object.
+            if (type == "object") {
+              className = getClass.call(value);
+            }
+            switch (className || type) {
+              case "boolean":
+              case booleanClass:
+                // Booleans are represented literally.
+                return "" + value;
+              case "number":
+              case numberClass:
+                // JSON numbers must be finite. `Infinity` and `NaN` are serialized as
+                // `"null"`.
+                return value > -1 / 0 && value < 1 / 0 ? "" + value : "null";
+              case "string":
+              case stringClass:
+                // Strings are double-quoted and escaped.
+                return quote("" + value);
+            }
+            // Recursively serialize objects and arrays.
+            if (typeof value == "object") {
+              // Check for cyclic structures. This is a linear search; performance
+              // is inversely proportional to the number of unique nested objects.
+              for (length = stack.length; length--;) {
+                if (stack[length] === value) {
+                  // Cyclic structures cannot be serialized by `JSON.stringify`.
+                  throw TypeError();
+                }
+              }
+              // Add the object to the stack of traversed objects.
+              stack.push(value);
+              results = [];
+              // Save the current indentation level and indent one additional level.
+              prefix = indentation;
+              indentation += whitespace;
+              if (className == arrayClass) {
+                // Recursively serialize array elements.
+                for (index = 0, length = value.length; index < length; index++) {
+                  element = serialize(index, value, callback, properties, whitespace, indentation, stack);
+                  results.push(element === undefined ? "null" : element);
+                }
+                result = results.length ? (whitespace ? "[\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "]" : ("[" + results.join(",") + "]")) : "[]";
+              } else {
+                // Recursively serialize object members. Members are selected from
+                // either a user-specified list of property names, or the object
+                // itself.
+                forOwn(properties || value, function (property) {
+                  var element = serialize(property, value, callback, properties, whitespace, indentation, stack);
+                  if (element !== undefined) {
+                    // According to ES 5.1 section 15.12.3: "If `gap` {whitespace}
+                    // is not the empty string, let `member` {quote(property) + ":"}
+                    // be the concatenation of `member` and the `space` character."
+                    // The "`space` character" refers to the literal space
+                    // character, not the `space` {width} argument provided to
+                    // `JSON.stringify`.
+                    results.push(quote(property) + ":" + (whitespace ? " " : "") + element);
+                  }
+                });
+                result = results.length ? (whitespace ? "{\n" + indentation + results.join(",\n" + indentation) + "\n" + prefix + "}" : ("{" + results.join(",") + "}")) : "{}";
+              }
+              // Remove the object from the traversed object stack.
+              stack.pop();
+              return result;
+            }
+          };
+
+          // Public: `JSON.stringify`. See ES 5.1 section 15.12.3.
+          exports.stringify = function (source, filter, width) {
+            var whitespace, callback, properties, className;
+            if (objectTypes[typeof filter] && filter) {
+              className = getClass.call(filter);
+              if (className == functionClass) {
+                callback = filter;
+              } else if (className == arrayClass) {
+                // Convert the property names array into a makeshift set.
+                properties = {};
+                for (var index = 0, length = filter.length, value; index < length;) {
+                  value = filter[index++];
+                  className = getClass.call(value);
+                  if (className == "[object String]" || className == "[object Number]") {
+                    properties[value] = 1;
+                  }
+                }
+              }
+            }
+            if (width) {
+              className = getClass.call(width);
+              if (className == numberClass) {
+                // Convert the `width` to an integer and create a string containing
+                // `width` number of space characters.
+                if ((width -= width % 1) > 0) {
+                  if (width > 10) {
+                    width = 10;
+                  }
+                  for (whitespace = ""; whitespace.length < width;) {
+                    whitespace += " ";
+                  }
+                }
+              } else if (className == stringClass) {
+                whitespace = width.length <= 10 ? width : width.slice(0, 10);
+              }
+            }
+            // Opera <= 7.54u2 discards the values associated with empty string keys
+            // (`""`) only if they are used directly within an object member list
+            // (e.g., `!("" in { "": 1})`).
+            return serialize("", (value = {}, value[""] = source, value), callback, properties, whitespace, "", []);
+          };
+        }
+      }
+
+      // Public: Parses a JSON source string.
+      if (!has("json-parse")) {
+        var fromCharCode = String.fromCharCode;
+
+        // Internal: A map of escaped control characters and their unescaped
+        // equivalents.
+        var Unescapes = {
+          92: "\\",
+          34: '"',
+          47: "/",
+          98: "\b",
+          116: "\t",
+          110: "\n",
+          102: "\f",
+          114: "\r"
+        };
+
+        // Internal: Stores the parser state.
+        var Index, Source;
+
+        // Internal: Resets the parser state and throws a `SyntaxError`.
+        var abort = function () {
+          Index = Source = null;
+          throw SyntaxError();
+        };
+
+        // Internal: Returns the next token, or `"$"` if the parser has reached
+        // the end of the source string. A token may be a string, number, `null`
+        // literal, or Boolean literal.
+        var lex = function () {
+          var source = Source, length = source.length, value, begin, position, isSigned, charCode;
+          while (Index < length) {
+            charCode = source.charCodeAt(Index);
+            switch (charCode) {
+              case 9: case 10: case 13: case 32:
+                // Skip whitespace tokens, including tabs, carriage returns, line
+                // feeds, and space characters.
+                Index++;
+                break;
+              case 123: case 125: case 91: case 93: case 58: case 44:
+                // Parse a punctuator token (`{`, `}`, `[`, `]`, `:`, or `,`) at
+                // the current position.
+                value = charIndexBuggy ? source.charAt(Index) : source[Index];
+                Index++;
+                return value;
+              case 34:
+                // `"` delimits a JSON string; advance to the next character and
+                // begin parsing the string. String tokens are prefixed with the
+                // sentinel `@` character to distinguish them from punctuators and
+                // end-of-string tokens.
+                for (value = "@", Index++; Index < length;) {
+                  charCode = source.charCodeAt(Index);
+                  if (charCode < 32) {
+                    // Unescaped ASCII control characters (those with a code unit
+                    // less than the space character) are not permitted.
+                    abort();
+                  } else if (charCode == 92) {
+                    // A reverse solidus (`\`) marks the beginning of an escaped
+                    // control character (including `"`, `\`, and `/`) or Unicode
+                    // escape sequence.
+                    charCode = source.charCodeAt(++Index);
+                    switch (charCode) {
+                      case 92: case 34: case 47: case 98: case 116: case 110: case 102: case 114:
+                        // Revive escaped control characters.
+                        value += Unescapes[charCode];
+                        Index++;
+                        break;
+                      case 117:
+                        // `\u` marks the beginning of a Unicode escape sequence.
+                        // Advance to the first character and validate the
+                        // four-digit code point.
+                        begin = ++Index;
+                        for (position = Index + 4; Index < position; Index++) {
+                          charCode = source.charCodeAt(Index);
+                          // A valid sequence comprises four hexdigits (case-
+                          // insensitive) that form a single hexadecimal value.
+                          if (!(charCode >= 48 && charCode <= 57 || charCode >= 97 && charCode <= 102 || charCode >= 65 && charCode <= 70)) {
+                            // Invalid Unicode escape sequence.
+                            abort();
+                          }
+                        }
+                        // Revive the escaped character.
+                        value += fromCharCode("0x" + source.slice(begin, Index));
+                        break;
+                      default:
+                        // Invalid escape sequence.
+                        abort();
+                    }
+                  } else {
+                    if (charCode == 34) {
+                      // An unescaped double-quote character marks the end of the
+                      // string.
+                      break;
+                    }
+                    charCode = source.charCodeAt(Index);
+                    begin = Index;
+                    // Optimize for the common case where a string is valid.
+                    while (charCode >= 32 && charCode != 92 && charCode != 34) {
+                      charCode = source.charCodeAt(++Index);
+                    }
+                    // Append the string as-is.
+                    value += source.slice(begin, Index);
+                  }
+                }
+                if (source.charCodeAt(Index) == 34) {
+                  // Advance to the next character and return the revived string.
+                  Index++;
+                  return value;
+                }
+                // Unterminated string.
+                abort();
+              default:
+                // Parse numbers and literals.
+                begin = Index;
+                // Advance past the negative sign, if one is specified.
+                if (charCode == 45) {
+                  isSigned = true;
+                  charCode = source.charCodeAt(++Index);
+                }
+                // Parse an integer or floating-point value.
+                if (charCode >= 48 && charCode <= 57) {
+                  // Leading zeroes are interpreted as octal literals.
+                  if (charCode == 48 && ((charCode = source.charCodeAt(Index + 1)), charCode >= 48 && charCode <= 57)) {
+                    // Illegal octal literal.
+                    abort();
+                  }
+                  isSigned = false;
+                  // Parse the integer component.
+                  for (; Index < length && ((charCode = source.charCodeAt(Index)), charCode >= 48 && charCode <= 57); Index++);
+                  // Floats cannot contain a leading decimal point; however, this
+                  // case is already accounted for by the parser.
+                  if (source.charCodeAt(Index) == 46) {
+                    position = ++Index;
+                    // Parse the decimal component.
+                    for (; position < length; position++) {
+                      charCode = source.charCodeAt(position);
+                      if (charCode < 48 || charCode > 57) {
+                        break;
+                      }
+                    }
+                    if (position == Index) {
+                      // Illegal trailing decimal.
+                      abort();
+                    }
+                    Index = position;
+                  }
+                  // Parse exponents. The `e` denoting the exponent is
+                  // case-insensitive.
+                  charCode = source.charCodeAt(Index);
+                  if (charCode == 101 || charCode == 69) {
+                    charCode = source.charCodeAt(++Index);
+                    // Skip past the sign following the exponent, if one is
+                    // specified.
+                    if (charCode == 43 || charCode == 45) {
+                      Index++;
+                    }
+                    // Parse the exponential component.
+                    for (position = Index; position < length; position++) {
+                      charCode = source.charCodeAt(position);
+                      if (charCode < 48 || charCode > 57) {
+                        break;
+                      }
+                    }
+                    if (position == Index) {
+                      // Illegal empty exponent.
+                      abort();
+                    }
+                    Index = position;
+                  }
+                  // Coerce the parsed value to a JavaScript number.
+                  return +source.slice(begin, Index);
+                }
+                // A negative sign may only precede numbers.
+                if (isSigned) {
+                  abort();
+                }
+                // `true`, `false`, and `null` literals.
+                var temp = source.slice(Index, Index + 4);
+                if (temp == "true") {
+                  Index += 4;
+                  return true;
+                } else if (temp == "fals" && source.charCodeAt(Index + 4 ) == 101) {
+                  Index += 5;
+                  return false;
+                } else if (temp == "null") {
+                  Index += 4;
+                  return null;
+                }
+                // Unrecognized token.
+                abort();
+            }
+          }
+          // Return the sentinel `$` character if the parser has reached the end
+          // of the source string.
+          return "$";
+        };
+
+        // Internal: Parses a JSON `value` token.
+        var get = function (value) {
+          var results, hasMembers;
+          if (value == "$") {
+            // Unexpected end of input.
+            abort();
+          }
+          if (typeof value == "string") {
+            if ((charIndexBuggy ? value.charAt(0) : value[0]) == "@") {
+              // Remove the sentinel `@` character.
+              return value.slice(1);
+            }
+            // Parse object and array literals.
+            if (value == "[") {
+              // Parses a JSON array, returning a new JavaScript array.
+              results = [];
+              for (;;) {
+                value = lex();
+                // A closing square bracket marks the end of the array literal.
+                if (value == "]") {
+                  break;
+                }
+                // If the array literal contains elements, the current token
+                // should be a comma separating the previous element from the
+                // next.
+                if (hasMembers) {
+                  if (value == ",") {
+                    value = lex();
+                    if (value == "]") {
+                      // Unexpected trailing `,` in array literal.
+                      abort();
+                    }
+                  } else {
+                    // A `,` must separate each array element.
+                    abort();
+                  }
+                } else {
+                  hasMembers = true;
+                }
+                // Elisions and leading commas are not permitted.
+                if (value == ",") {
+                  abort();
+                }
+                results.push(get(value));
+              }
+              return results;
+            } else if (value == "{") {
+              // Parses a JSON object, returning a new JavaScript object.
+              results = {};
+              for (;;) {
+                value = lex();
+                // A closing curly brace marks the end of the object literal.
+                if (value == "}") {
+                  break;
+                }
+                // If the object literal contains members, the current token
+                // should be a comma separator.
+                if (hasMembers) {
+                  if (value == ",") {
+                    value = lex();
+                    if (value == "}") {
+                      // Unexpected trailing `,` in object literal.
+                      abort();
+                    }
+                  } else {
+                    // A `,` must separate each object member.
+                    abort();
+                  }
+                } else {
+                  hasMembers = true;
+                }
+                // Leading commas are not permitted, object property names must be
+                // double-quoted strings, and a `:` must separate each property
+                // name and value.
+                if (value == "," || typeof value != "string" || (charIndexBuggy ? value.charAt(0) : value[0]) != "@" || lex() != ":") {
+                  abort();
+                }
+                results[value.slice(1)] = get(lex());
+              }
+              return results;
+            }
+            // Unexpected token encountered.
+            abort();
+          }
+          return value;
+        };
+
+        // Internal: Updates a traversed object member.
+        var update = function (source, property, callback) {
+          var element = walk(source, property, callback);
+          if (element === undefined) {
+            delete source[property];
+          } else {
+            source[property] = element;
+          }
+        };
+
+        // Internal: Recursively traverses a parsed JSON object, invoking the
+        // `callback` function for each value. This is an implementation of the
+        // `Walk(holder, name)` operation defined in ES 5.1 section 15.12.2.
+        var walk = function (source, property, callback) {
+          var value = source[property], length;
+          if (typeof value == "object" && value) {
+            // `forOwn` can't be used to traverse an array in Opera <= 8.54
+            // because its `Object#hasOwnProperty` implementation returns `false`
+            // for array indices (e.g., `![1, 2, 3].hasOwnProperty("0")`).
+            if (getClass.call(value) == arrayClass) {
+              for (length = value.length; length--;) {
+                update(getClass, forOwn, value, length, callback);
+              }
+            } else {
+              forOwn(value, function (property) {
+                update(value, property, callback);
+              });
+            }
+          }
+          return callback.call(source, property, value);
+        };
+
+        // Public: `JSON.parse`. See ES 5.1 section 15.12.2.
+        exports.parse = function (source, callback) {
+          var result, value;
+          Index = 0;
+          Source = "" + source;
+          result = get(lex());
+          // If a JSON string contains multiple tokens, it is invalid.
+          if (lex() != "$") {
+            abort();
+          }
+          // Reset the parser state.
+          Index = Source = null;
+          return callback && getClass.call(callback) == functionClass ? walk((value = {}, value[""] = result, value), "", callback) : result;
+        };
+      }
+    }
+
+    exports.runInContext = runInContext;
+    return exports;
+  }
+
+  if (freeExports && !isLoader) {
+    // Export for CommonJS environments.
+    runInContext(root, freeExports);
+  } else {
+    // Export for web browsers and JavaScript engines.
+    var nativeJSON = root.JSON,
+        previousJSON = root.JSON3,
+        isRestored = false;
+
+    var JSON3 = runInContext(root, (root.JSON3 = {
+      // Public: Restores the original value of the global `JSON` object and
+      // returns a reference to the `JSON3` object.
+      "noConflict": function () {
+        if (!isRestored) {
+          isRestored = true;
+          root.JSON = nativeJSON;
+          root.JSON3 = previousJSON;
+          nativeJSON = previousJSON = null;
+        }
+        return JSON3;
+      }
+    }));
+
+    root.JSON = {
+      "parse": JSON3.parse,
+      "stringify": JSON3.stringify
+    };
+  }
+
+  // Export for asynchronous module loaders.
+  if (isLoader) {
+    !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+      return JSON3;
+    }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  }
+}).call(this);
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/module.js */ "./node_modules/webpack/buildin/module.js")(module), __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -39868,6 +43712,136 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/querystringify/index.js":
+/*!**********************************************!*\
+  !*** ./node_modules/querystringify/index.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var has = Object.prototype.hasOwnProperty
+  , undef;
+
+/**
+ * Decode a URI encoded string.
+ *
+ * @param {String} input The URI encoded string.
+ * @returns {String|Null} The decoded string.
+ * @api private
+ */
+function decode(input) {
+  try {
+    return decodeURIComponent(input.replace(/\+/g, ' '));
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Attempts to encode a given input.
+ *
+ * @param {String} input The string that needs to be encoded.
+ * @returns {String|Null} The encoded string.
+ * @api private
+ */
+function encode(input) {
+  try {
+    return encodeURIComponent(input);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Simple query string parser.
+ *
+ * @param {String} query The query string that needs to be parsed.
+ * @returns {Object}
+ * @api public
+ */
+function querystring(query) {
+  var parser = /([^=?&]+)=?([^&]*)/g
+    , result = {}
+    , part;
+
+  while (part = parser.exec(query)) {
+    var key = decode(part[1])
+      , value = decode(part[2]);
+
+    //
+    // Prevent overriding of existing properties. This ensures that build-in
+    // methods like `toString` or __proto__ are not overriden by malicious
+    // querystrings.
+    //
+    // In the case if failed decoding, we want to omit the key/value pairs
+    // from the result.
+    //
+    if (key === null || value === null || key in result) continue;
+    result[key] = value;
+  }
+
+  return result;
+}
+
+/**
+ * Transform a query string to an object.
+ *
+ * @param {Object} obj Object that should be transformed.
+ * @param {String} prefix Optional prefix.
+ * @returns {String}
+ * @api public
+ */
+function querystringify(obj, prefix) {
+  prefix = prefix || '';
+
+  var pairs = []
+    , value
+    , key;
+
+  //
+  // Optionally prefix with a '?' if needed
+  //
+  if ('string' !== typeof prefix) prefix = '?';
+
+  for (key in obj) {
+    if (has.call(obj, key)) {
+      value = obj[key];
+
+      //
+      // Edge cases where we actually want to encode the value to an empty
+      // string instead of the stringified value.
+      //
+      if (!value && (value === null || value === undef || isNaN(value))) {
+        value = '';
+      }
+
+      key = encodeURIComponent(key);
+      value = encodeURIComponent(value);
+
+      //
+      // If we failed to encode the strings, we should bail out as we don't
+      // want to add invalid strings to the query.
+      //
+      if (key === null || value === null) continue;
+      pairs.push(key +'='+ value);
+    }
+  }
+
+  return pairs.length ? prefix + pairs.join('&') : '';
+}
+
+//
+// Expose the module.
+//
+exports.stringify = querystringify;
+exports.parse = querystring;
+
+
+/***/ }),
+
 /***/ "./node_modules/regenerator-runtime/runtime.js":
 /*!*****************************************************!*\
   !*** ./node_modules/regenerator-runtime/runtime.js ***!
@@ -40605,6 +44579,56 @@ try {
 
 /***/ }),
 
+/***/ "./node_modules/requires-port/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/requires-port/index.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Check if we're required to add a port number.
+ *
+ * @see https://url.spec.whatwg.org/#default-port
+ * @param {Number|String} port Port number we need to check
+ * @param {String} protocol Protocol we need to check against.
+ * @returns {Boolean} Is it a default port for the given protocol
+ * @api private
+ */
+module.exports = function required(port, protocol) {
+  protocol = protocol.split(':')[0];
+  port = +port;
+
+  if (!port) return false;
+
+  switch (protocol) {
+    case 'http':
+    case 'ws':
+    return port !== 80;
+
+    case 'https':
+    case 'wss':
+    return port !== 443;
+
+    case 'ftp':
+    return port !== 21;
+
+    case 'gopher':
+    return port !== 70;
+
+    case 'file':
+    return false;
+  }
+
+  return port !== 0;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/setimmediate/setImmediate.js":
 /*!***************************************************!*\
   !*** ./node_modules/setimmediate/setImmediate.js ***!
@@ -40800,6 +44824,4817 @@ try {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/entry.js":
+/*!*************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/entry.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var transportList = __webpack_require__(/*! ./transport-list */ "./node_modules/sockjs-client/lib/transport-list.js");
+
+module.exports = __webpack_require__(/*! ./main */ "./node_modules/sockjs-client/lib/main.js")(transportList);
+
+// TODO can't get rid of this until all servers do
+if ('_sockjs_onload' in global) {
+  setTimeout(global._sockjs_onload, 1);
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/event/close.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/event/close.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , Event = __webpack_require__(/*! ./event */ "./node_modules/sockjs-client/lib/event/event.js")
+  ;
+
+function CloseEvent() {
+  Event.call(this);
+  this.initEvent('close', false, false);
+  this.wasClean = false;
+  this.code = 0;
+  this.reason = '';
+}
+
+inherits(CloseEvent, Event);
+
+module.exports = CloseEvent;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/event/emitter.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/event/emitter.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventTarget = __webpack_require__(/*! ./eventtarget */ "./node_modules/sockjs-client/lib/event/eventtarget.js")
+  ;
+
+function EventEmitter() {
+  EventTarget.call(this);
+}
+
+inherits(EventEmitter, EventTarget);
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  if (type) {
+    delete this._listeners[type];
+  } else {
+    this._listeners = {};
+  }
+};
+
+EventEmitter.prototype.once = function(type, listener) {
+  var self = this
+    , fired = false;
+
+  function g() {
+    self.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  this.on(type, g);
+};
+
+EventEmitter.prototype.emit = function() {
+  var type = arguments[0];
+  var listeners = this._listeners[type];
+  if (!listeners) {
+    return;
+  }
+  // equivalent of Array.prototype.slice.call(arguments, 1);
+  var l = arguments.length;
+  var args = new Array(l - 1);
+  for (var ai = 1; ai < l; ai++) {
+    args[ai - 1] = arguments[ai];
+  }
+  for (var i = 0; i < listeners.length; i++) {
+    listeners[i].apply(this, args);
+  }
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener = EventTarget.prototype.addEventListener;
+EventEmitter.prototype.removeListener = EventTarget.prototype.removeEventListener;
+
+module.exports.EventEmitter = EventEmitter;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/event/event.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/event/event.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function Event(eventType) {
+  this.type = eventType;
+}
+
+Event.prototype.initEvent = function(eventType, canBubble, cancelable) {
+  this.type = eventType;
+  this.bubbles = canBubble;
+  this.cancelable = cancelable;
+  this.timeStamp = +new Date();
+  return this;
+};
+
+Event.prototype.stopPropagation = function() {};
+Event.prototype.preventDefault = function() {};
+
+Event.CAPTURING_PHASE = 1;
+Event.AT_TARGET = 2;
+Event.BUBBLING_PHASE = 3;
+
+module.exports = Event;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/event/eventtarget.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/event/eventtarget.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/* Simplified implementation of DOM2 EventTarget.
+ *   http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
+ */
+
+function EventTarget() {
+  this._listeners = {};
+}
+
+EventTarget.prototype.addEventListener = function(eventType, listener) {
+  if (!(eventType in this._listeners)) {
+    this._listeners[eventType] = [];
+  }
+  var arr = this._listeners[eventType];
+  // #4
+  if (arr.indexOf(listener) === -1) {
+    // Make a copy so as not to interfere with a current dispatchEvent.
+    arr = arr.concat([listener]);
+  }
+  this._listeners[eventType] = arr;
+};
+
+EventTarget.prototype.removeEventListener = function(eventType, listener) {
+  var arr = this._listeners[eventType];
+  if (!arr) {
+    return;
+  }
+  var idx = arr.indexOf(listener);
+  if (idx !== -1) {
+    if (arr.length > 1) {
+      // Make a copy so as not to interfere with a current dispatchEvent.
+      this._listeners[eventType] = arr.slice(0, idx).concat(arr.slice(idx + 1));
+    } else {
+      delete this._listeners[eventType];
+    }
+    return;
+  }
+};
+
+EventTarget.prototype.dispatchEvent = function() {
+  var event = arguments[0];
+  var t = event.type;
+  // equivalent of Array.prototype.slice.call(arguments, 0);
+  var args = arguments.length === 1 ? [event] : Array.apply(null, arguments);
+  // TODO: This doesn't match the real behavior; per spec, onfoo get
+  // their place in line from the /first/ time they're set from
+  // non-null. Although WebKit bumps it to the end every time it's
+  // set.
+  if (this['on' + t]) {
+    this['on' + t].apply(this, args);
+  }
+  if (t in this._listeners) {
+    // Grab a reference to the listeners list. removeEventListener may alter the list.
+    var listeners = this._listeners[t];
+    for (var i = 0; i < listeners.length; i++) {
+      listeners[i].apply(this, args);
+    }
+  }
+};
+
+module.exports = EventTarget;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/event/trans-message.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/event/trans-message.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , Event = __webpack_require__(/*! ./event */ "./node_modules/sockjs-client/lib/event/event.js")
+  ;
+
+function TransportMessageEvent(data) {
+  Event.call(this);
+  this.initEvent('message', false, false);
+  this.data = data;
+}
+
+inherits(TransportMessageEvent, Event);
+
+module.exports = TransportMessageEvent;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/facade.js":
+/*!**************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/facade.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , iframeUtils = __webpack_require__(/*! ./utils/iframe */ "./node_modules/sockjs-client/lib/utils/iframe.js")
+  ;
+
+function FacadeJS(transport) {
+  this._transport = transport;
+  transport.on('message', this._transportMessage.bind(this));
+  transport.on('close', this._transportClose.bind(this));
+}
+
+FacadeJS.prototype._transportClose = function(code, reason) {
+  iframeUtils.postMessage('c', JSON3.stringify([code, reason]));
+};
+FacadeJS.prototype._transportMessage = function(frame) {
+  iframeUtils.postMessage('t', frame);
+};
+FacadeJS.prototype._send = function(data) {
+  this._transport.send(data);
+};
+FacadeJS.prototype._close = function() {
+  this._transport.close();
+  this._transport.removeAllListeners();
+};
+
+module.exports = FacadeJS;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/iframe-bootstrap.js":
+/*!************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/iframe-bootstrap.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var urlUtils = __webpack_require__(/*! ./utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , eventUtils = __webpack_require__(/*! ./utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , FacadeJS = __webpack_require__(/*! ./facade */ "./node_modules/sockjs-client/lib/facade.js")
+  , InfoIframeReceiver = __webpack_require__(/*! ./info-iframe-receiver */ "./node_modules/sockjs-client/lib/info-iframe-receiver.js")
+  , iframeUtils = __webpack_require__(/*! ./utils/iframe */ "./node_modules/sockjs-client/lib/utils/iframe.js")
+  , loc = __webpack_require__(/*! ./location */ "./node_modules/sockjs-client/lib/location.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:iframe-bootstrap');
+}
+
+module.exports = function(SockJS, availableTransports) {
+  var transportMap = {};
+  availableTransports.forEach(function(at) {
+    if (at.facadeTransport) {
+      transportMap[at.facadeTransport.transportName] = at.facadeTransport;
+    }
+  });
+
+  // hard-coded for the info iframe
+  // TODO see if we can make this more dynamic
+  transportMap[InfoIframeReceiver.transportName] = InfoIframeReceiver;
+  var parentOrigin;
+
+  /* eslint-disable camelcase */
+  SockJS.bootstrap_iframe = function() {
+    /* eslint-enable camelcase */
+    var facade;
+    iframeUtils.currentWindowId = loc.hash.slice(1);
+    var onMessage = function(e) {
+      if (e.source !== parent) {
+        return;
+      }
+      if (typeof parentOrigin === 'undefined') {
+        parentOrigin = e.origin;
+      }
+      if (e.origin !== parentOrigin) {
+        return;
+      }
+
+      var iframeMessage;
+      try {
+        iframeMessage = JSON3.parse(e.data);
+      } catch (ignored) {
+        debug('bad json', e.data);
+        return;
+      }
+
+      if (iframeMessage.windowId !== iframeUtils.currentWindowId) {
+        return;
+      }
+      switch (iframeMessage.type) {
+      case 's':
+        var p;
+        try {
+          p = JSON3.parse(iframeMessage.data);
+        } catch (ignored) {
+          debug('bad json', iframeMessage.data);
+          break;
+        }
+        var version = p[0];
+        var transport = p[1];
+        var transUrl = p[2];
+        var baseUrl = p[3];
+        debug(version, transport, transUrl, baseUrl);
+        // change this to semver logic
+        if (version !== SockJS.version) {
+          throw new Error('Incompatible SockJS! Main site uses:' +
+                    ' "' + version + '", the iframe:' +
+                    ' "' + SockJS.version + '".');
+        }
+
+        if (!urlUtils.isOriginEqual(transUrl, loc.href) ||
+            !urlUtils.isOriginEqual(baseUrl, loc.href)) {
+          throw new Error('Can\'t connect to different domain from within an ' +
+                    'iframe. (' + loc.href + ', ' + transUrl + ', ' + baseUrl + ')');
+        }
+        facade = new FacadeJS(new transportMap[transport](transUrl, baseUrl));
+        break;
+      case 'm':
+        facade._send(iframeMessage.data);
+        break;
+      case 'c':
+        if (facade) {
+          facade._close();
+        }
+        facade = null;
+        break;
+      }
+    };
+
+    eventUtils.attachEvent('message', onMessage);
+
+    // Start
+    iframeUtils.postMessage('s');
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/info-ajax.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/info-ajax.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , objectUtils = __webpack_require__(/*! ./utils/object */ "./node_modules/sockjs-client/lib/utils/object.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:info-ajax');
+}
+
+function InfoAjax(url, AjaxObject) {
+  EventEmitter.call(this);
+
+  var self = this;
+  var t0 = +new Date();
+  this.xo = new AjaxObject('GET', url);
+
+  this.xo.once('finish', function(status, text) {
+    var info, rtt;
+    if (status === 200) {
+      rtt = (+new Date()) - t0;
+      if (text) {
+        try {
+          info = JSON3.parse(text);
+        } catch (e) {
+          debug('bad json', text);
+        }
+      }
+
+      if (!objectUtils.isObject(info)) {
+        info = {};
+      }
+    }
+    self.emit('finish', info, rtt);
+    self.removeAllListeners();
+  });
+}
+
+inherits(InfoAjax, EventEmitter);
+
+InfoAjax.prototype.close = function() {
+  this.removeAllListeners();
+  this.xo.close();
+};
+
+module.exports = InfoAjax;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/info-iframe-receiver.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/info-iframe-receiver.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , XHRLocalObject = __webpack_require__(/*! ./transport/sender/xhr-local */ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js")
+  , InfoAjax = __webpack_require__(/*! ./info-ajax */ "./node_modules/sockjs-client/lib/info-ajax.js")
+  ;
+
+function InfoReceiverIframe(transUrl) {
+  var self = this;
+  EventEmitter.call(this);
+
+  this.ir = new InfoAjax(transUrl, XHRLocalObject);
+  this.ir.once('finish', function(info, rtt) {
+    self.ir = null;
+    self.emit('message', JSON3.stringify([info, rtt]));
+  });
+}
+
+inherits(InfoReceiverIframe, EventEmitter);
+
+InfoReceiverIframe.transportName = 'iframe-info-receiver';
+
+InfoReceiverIframe.prototype.close = function() {
+  if (this.ir) {
+    this.ir.close();
+    this.ir = null;
+  }
+  this.removeAllListeners();
+};
+
+module.exports = InfoReceiverIframe;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/info-iframe.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/info-iframe.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , utils = __webpack_require__(/*! ./utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , IframeTransport = __webpack_require__(/*! ./transport/iframe */ "./node_modules/sockjs-client/lib/transport/iframe.js")
+  , InfoReceiverIframe = __webpack_require__(/*! ./info-iframe-receiver */ "./node_modules/sockjs-client/lib/info-iframe-receiver.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:info-iframe');
+}
+
+function InfoIframe(baseUrl, url) {
+  var self = this;
+  EventEmitter.call(this);
+
+  var go = function() {
+    var ifr = self.ifr = new IframeTransport(InfoReceiverIframe.transportName, url, baseUrl);
+
+    ifr.once('message', function(msg) {
+      if (msg) {
+        var d;
+        try {
+          d = JSON3.parse(msg);
+        } catch (e) {
+          debug('bad json', msg);
+          self.emit('finish');
+          self.close();
+          return;
+        }
+
+        var info = d[0], rtt = d[1];
+        self.emit('finish', info, rtt);
+      }
+      self.close();
+    });
+
+    ifr.once('close', function() {
+      self.emit('finish');
+      self.close();
+    });
+  };
+
+  // TODO this seems the same as the 'needBody' from transports
+  if (!global.document.body) {
+    utils.attachEvent('load', go);
+  } else {
+    go();
+  }
+}
+
+inherits(InfoIframe, EventEmitter);
+
+InfoIframe.enabled = function() {
+  return IframeTransport.enabled();
+};
+
+InfoIframe.prototype.close = function() {
+  if (this.ifr) {
+    this.ifr.close();
+  }
+  this.removeAllListeners();
+  this.ifr = null;
+};
+
+module.exports = InfoIframe;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/info-receiver.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/info-receiver.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , urlUtils = __webpack_require__(/*! ./utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , XDR = __webpack_require__(/*! ./transport/sender/xdr */ "./node_modules/sockjs-client/lib/transport/sender/xdr.js")
+  , XHRCors = __webpack_require__(/*! ./transport/sender/xhr-cors */ "./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js")
+  , XHRLocal = __webpack_require__(/*! ./transport/sender/xhr-local */ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js")
+  , XHRFake = __webpack_require__(/*! ./transport/sender/xhr-fake */ "./node_modules/sockjs-client/lib/transport/sender/xhr-fake.js")
+  , InfoIframe = __webpack_require__(/*! ./info-iframe */ "./node_modules/sockjs-client/lib/info-iframe.js")
+  , InfoAjax = __webpack_require__(/*! ./info-ajax */ "./node_modules/sockjs-client/lib/info-ajax.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:info-receiver');
+}
+
+function InfoReceiver(baseUrl, urlInfo) {
+  debug(baseUrl);
+  var self = this;
+  EventEmitter.call(this);
+
+  setTimeout(function() {
+    self.doXhr(baseUrl, urlInfo);
+  }, 0);
+}
+
+inherits(InfoReceiver, EventEmitter);
+
+// TODO this is currently ignoring the list of available transports and the whitelist
+
+InfoReceiver._getReceiver = function(baseUrl, url, urlInfo) {
+  // determine method of CORS support (if needed)
+  if (urlInfo.sameOrigin) {
+    return new InfoAjax(url, XHRLocal);
+  }
+  if (XHRCors.enabled) {
+    return new InfoAjax(url, XHRCors);
+  }
+  if (XDR.enabled && urlInfo.sameScheme) {
+    return new InfoAjax(url, XDR);
+  }
+  if (InfoIframe.enabled()) {
+    return new InfoIframe(baseUrl, url);
+  }
+  return new InfoAjax(url, XHRFake);
+};
+
+InfoReceiver.prototype.doXhr = function(baseUrl, urlInfo) {
+  var self = this
+    , url = urlUtils.addPath(baseUrl, '/info')
+    ;
+  debug('doXhr', url);
+
+  this.xo = InfoReceiver._getReceiver(baseUrl, url, urlInfo);
+
+  this.timeoutRef = setTimeout(function() {
+    debug('timeout');
+    self._cleanup(false);
+    self.emit('finish');
+  }, InfoReceiver.timeout);
+
+  this.xo.once('finish', function(info, rtt) {
+    debug('finish', info, rtt);
+    self._cleanup(true);
+    self.emit('finish', info, rtt);
+  });
+};
+
+InfoReceiver.prototype._cleanup = function(wasClean) {
+  debug('_cleanup');
+  clearTimeout(this.timeoutRef);
+  this.timeoutRef = null;
+  if (!wasClean && this.xo) {
+    this.xo.close();
+  }
+  this.xo = null;
+};
+
+InfoReceiver.prototype.close = function() {
+  debug('close');
+  this.removeAllListeners();
+  this._cleanup(false);
+};
+
+InfoReceiver.timeout = 8000;
+
+module.exports = InfoReceiver;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/location.js":
+/*!****************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/location.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+module.exports = global.location || {
+  origin: 'http://localhost:80'
+, protocol: 'http:'
+, host: 'localhost'
+, port: 80
+, href: 'http://localhost/'
+, hash: ''
+};
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/main.js":
+/*!************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/main.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+__webpack_require__(/*! ./shims */ "./node_modules/sockjs-client/lib/shims.js");
+
+var URL = __webpack_require__(/*! url-parse */ "./node_modules/url-parse/index.js")
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , random = __webpack_require__(/*! ./utils/random */ "./node_modules/sockjs-client/lib/utils/random.js")
+  , escape = __webpack_require__(/*! ./utils/escape */ "./node_modules/sockjs-client/lib/utils/escape.js")
+  , urlUtils = __webpack_require__(/*! ./utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , eventUtils = __webpack_require__(/*! ./utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , transport = __webpack_require__(/*! ./utils/transport */ "./node_modules/sockjs-client/lib/utils/transport.js")
+  , objectUtils = __webpack_require__(/*! ./utils/object */ "./node_modules/sockjs-client/lib/utils/object.js")
+  , browser = __webpack_require__(/*! ./utils/browser */ "./node_modules/sockjs-client/lib/utils/browser.js")
+  , log = __webpack_require__(/*! ./utils/log */ "./node_modules/sockjs-client/lib/utils/log.js")
+  , Event = __webpack_require__(/*! ./event/event */ "./node_modules/sockjs-client/lib/event/event.js")
+  , EventTarget = __webpack_require__(/*! ./event/eventtarget */ "./node_modules/sockjs-client/lib/event/eventtarget.js")
+  , loc = __webpack_require__(/*! ./location */ "./node_modules/sockjs-client/lib/location.js")
+  , CloseEvent = __webpack_require__(/*! ./event/close */ "./node_modules/sockjs-client/lib/event/close.js")
+  , TransportMessageEvent = __webpack_require__(/*! ./event/trans-message */ "./node_modules/sockjs-client/lib/event/trans-message.js")
+  , InfoReceiver = __webpack_require__(/*! ./info-receiver */ "./node_modules/sockjs-client/lib/info-receiver.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:main');
+}
+
+var transports;
+
+// follow constructor steps defined at http://dev.w3.org/html5/websockets/#the-websocket-interface
+function SockJS(url, protocols, options) {
+  if (!(this instanceof SockJS)) {
+    return new SockJS(url, protocols, options);
+  }
+  if (arguments.length < 1) {
+    throw new TypeError("Failed to construct 'SockJS: 1 argument required, but only 0 present");
+  }
+  EventTarget.call(this);
+
+  this.readyState = SockJS.CONNECTING;
+  this.extensions = '';
+  this.protocol = '';
+
+  // non-standard extension
+  options = options || {};
+  if (options.protocols_whitelist) {
+    log.warn("'protocols_whitelist' is DEPRECATED. Use 'transports' instead.");
+  }
+  this._transportsWhitelist = options.transports;
+  this._transportOptions = options.transportOptions || {};
+  this._timeout = options.timeout || 0;
+
+  var sessionId = options.sessionId || 8;
+  if (typeof sessionId === 'function') {
+    this._generateSessionId = sessionId;
+  } else if (typeof sessionId === 'number') {
+    this._generateSessionId = function() {
+      return random.string(sessionId);
+    };
+  } else {
+    throw new TypeError('If sessionId is used in the options, it needs to be a number or a function.');
+  }
+
+  this._server = options.server || random.numberString(1000);
+
+  // Step 1 of WS spec - parse and validate the url. Issue #8
+  var parsedUrl = new URL(url);
+  if (!parsedUrl.host || !parsedUrl.protocol) {
+    throw new SyntaxError("The URL '" + url + "' is invalid");
+  } else if (parsedUrl.hash) {
+    throw new SyntaxError('The URL must not contain a fragment');
+  } else if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    throw new SyntaxError("The URL's scheme must be either 'http:' or 'https:'. '" + parsedUrl.protocol + "' is not allowed.");
+  }
+
+  var secure = parsedUrl.protocol === 'https:';
+  // Step 2 - don't allow secure origin with an insecure protocol
+  if (loc.protocol === 'https:' && !secure) {
+    throw new Error('SecurityError: An insecure SockJS connection may not be initiated from a page loaded over HTTPS');
+  }
+
+  // Step 3 - check port access - no need here
+  // Step 4 - parse protocols argument
+  if (!protocols) {
+    protocols = [];
+  } else if (!Array.isArray(protocols)) {
+    protocols = [protocols];
+  }
+
+  // Step 5 - check protocols argument
+  var sortedProtocols = protocols.sort();
+  sortedProtocols.forEach(function(proto, i) {
+    if (!proto) {
+      throw new SyntaxError("The protocols entry '" + proto + "' is invalid.");
+    }
+    if (i < (sortedProtocols.length - 1) && proto === sortedProtocols[i + 1]) {
+      throw new SyntaxError("The protocols entry '" + proto + "' is duplicated.");
+    }
+  });
+
+  // Step 6 - convert origin
+  var o = urlUtils.getOrigin(loc.href);
+  this._origin = o ? o.toLowerCase() : null;
+
+  // remove the trailing slash
+  parsedUrl.set('pathname', parsedUrl.pathname.replace(/\/+$/, ''));
+
+  // store the sanitized url
+  this.url = parsedUrl.href;
+  debug('using url', this.url);
+
+  // Step 7 - start connection in background
+  // obtain server info
+  // http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html#section-26
+  this._urlInfo = {
+    nullOrigin: !browser.hasDomain()
+  , sameOrigin: urlUtils.isOriginEqual(this.url, loc.href)
+  , sameScheme: urlUtils.isSchemeEqual(this.url, loc.href)
+  };
+
+  this._ir = new InfoReceiver(this.url, this._urlInfo);
+  this._ir.once('finish', this._receiveInfo.bind(this));
+}
+
+inherits(SockJS, EventTarget);
+
+function userSetCode(code) {
+  return code === 1000 || (code >= 3000 && code <= 4999);
+}
+
+SockJS.prototype.close = function(code, reason) {
+  // Step 1
+  if (code && !userSetCode(code)) {
+    throw new Error('InvalidAccessError: Invalid code');
+  }
+  // Step 2.4 states the max is 123 bytes, but we are just checking length
+  if (reason && reason.length > 123) {
+    throw new SyntaxError('reason argument has an invalid length');
+  }
+
+  // Step 3.1
+  if (this.readyState === SockJS.CLOSING || this.readyState === SockJS.CLOSED) {
+    return;
+  }
+
+  // TODO look at docs to determine how to set this
+  var wasClean = true;
+  this._close(code || 1000, reason || 'Normal closure', wasClean);
+};
+
+SockJS.prototype.send = function(data) {
+  // #13 - convert anything non-string to string
+  // TODO this currently turns objects into [object Object]
+  if (typeof data !== 'string') {
+    data = '' + data;
+  }
+  if (this.readyState === SockJS.CONNECTING) {
+    throw new Error('InvalidStateError: The connection has not been established yet');
+  }
+  if (this.readyState !== SockJS.OPEN) {
+    return;
+  }
+  this._transport.send(escape.quote(data));
+};
+
+SockJS.version = __webpack_require__(/*! ./version */ "./node_modules/sockjs-client/lib/version.js");
+
+SockJS.CONNECTING = 0;
+SockJS.OPEN = 1;
+SockJS.CLOSING = 2;
+SockJS.CLOSED = 3;
+
+SockJS.prototype._receiveInfo = function(info, rtt) {
+  debug('_receiveInfo', rtt);
+  this._ir = null;
+  if (!info) {
+    this._close(1002, 'Cannot connect to server');
+    return;
+  }
+
+  // establish a round-trip timeout (RTO) based on the
+  // round-trip time (RTT)
+  this._rto = this.countRTO(rtt);
+  // allow server to override url used for the actual transport
+  this._transUrl = info.base_url ? info.base_url : this.url;
+  info = objectUtils.extend(info, this._urlInfo);
+  debug('info', info);
+  // determine list of desired and supported transports
+  var enabledTransports = transports.filterToEnabled(this._transportsWhitelist, info);
+  this._transports = enabledTransports.main;
+  debug(this._transports.length + ' enabled transports');
+
+  this._connect();
+};
+
+SockJS.prototype._connect = function() {
+  for (var Transport = this._transports.shift(); Transport; Transport = this._transports.shift()) {
+    debug('attempt', Transport.transportName);
+    if (Transport.needBody) {
+      if (!global.document.body ||
+          (typeof global.document.readyState !== 'undefined' &&
+            global.document.readyState !== 'complete' &&
+            global.document.readyState !== 'interactive')) {
+        debug('waiting for body');
+        this._transports.unshift(Transport);
+        eventUtils.attachEvent('load', this._connect.bind(this));
+        return;
+      }
+    }
+
+    // calculate timeout based on RTO and round trips. Default to 5s
+    var timeoutMs = Math.max(this._timeout, (this._rto * Transport.roundTrips) || 5000);
+    this._transportTimeoutId = setTimeout(this._transportTimeout.bind(this), timeoutMs);
+    debug('using timeout', timeoutMs);
+
+    var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + this._generateSessionId());
+    var options = this._transportOptions[Transport.transportName];
+    debug('transport url', transportUrl);
+    var transportObj = new Transport(transportUrl, this._transUrl, options);
+    transportObj.on('message', this._transportMessage.bind(this));
+    transportObj.once('close', this._transportClose.bind(this));
+    transportObj.transportName = Transport.transportName;
+    this._transport = transportObj;
+
+    return;
+  }
+  this._close(2000, 'All transports failed', false);
+};
+
+SockJS.prototype._transportTimeout = function() {
+  debug('_transportTimeout');
+  if (this.readyState === SockJS.CONNECTING) {
+    if (this._transport) {
+      this._transport.close();
+    }
+
+    this._transportClose(2007, 'Transport timed out');
+  }
+};
+
+SockJS.prototype._transportMessage = function(msg) {
+  debug('_transportMessage', msg);
+  var self = this
+    , type = msg.slice(0, 1)
+    , content = msg.slice(1)
+    , payload
+    ;
+
+  // first check for messages that don't need a payload
+  switch (type) {
+    case 'o':
+      this._open();
+      return;
+    case 'h':
+      this.dispatchEvent(new Event('heartbeat'));
+      debug('heartbeat', this.transport);
+      return;
+  }
+
+  if (content) {
+    try {
+      payload = JSON3.parse(content);
+    } catch (e) {
+      debug('bad json', content);
+    }
+  }
+
+  if (typeof payload === 'undefined') {
+    debug('empty payload', content);
+    return;
+  }
+
+  switch (type) {
+    case 'a':
+      if (Array.isArray(payload)) {
+        payload.forEach(function(p) {
+          debug('message', self.transport, p);
+          self.dispatchEvent(new TransportMessageEvent(p));
+        });
+      }
+      break;
+    case 'm':
+      debug('message', this.transport, payload);
+      this.dispatchEvent(new TransportMessageEvent(payload));
+      break;
+    case 'c':
+      if (Array.isArray(payload) && payload.length === 2) {
+        this._close(payload[0], payload[1], true);
+      }
+      break;
+  }
+};
+
+SockJS.prototype._transportClose = function(code, reason) {
+  debug('_transportClose', this.transport, code, reason);
+  if (this._transport) {
+    this._transport.removeAllListeners();
+    this._transport = null;
+    this.transport = null;
+  }
+
+  if (!userSetCode(code) && code !== 2000 && this.readyState === SockJS.CONNECTING) {
+    this._connect();
+    return;
+  }
+
+  this._close(code, reason);
+};
+
+SockJS.prototype._open = function() {
+  debug('_open', this._transport && this._transport.transportName, this.readyState);
+  if (this.readyState === SockJS.CONNECTING) {
+    if (this._transportTimeoutId) {
+      clearTimeout(this._transportTimeoutId);
+      this._transportTimeoutId = null;
+    }
+    this.readyState = SockJS.OPEN;
+    this.transport = this._transport.transportName;
+    this.dispatchEvent(new Event('open'));
+    debug('connected', this.transport);
+  } else {
+    // The server might have been restarted, and lost track of our
+    // connection.
+    this._close(1006, 'Server lost session');
+  }
+};
+
+SockJS.prototype._close = function(code, reason, wasClean) {
+  debug('_close', this.transport, code, reason, wasClean, this.readyState);
+  var forceFail = false;
+
+  if (this._ir) {
+    forceFail = true;
+    this._ir.close();
+    this._ir = null;
+  }
+  if (this._transport) {
+    this._transport.close();
+    this._transport = null;
+    this.transport = null;
+  }
+
+  if (this.readyState === SockJS.CLOSED) {
+    throw new Error('InvalidStateError: SockJS has already been closed');
+  }
+
+  this.readyState = SockJS.CLOSING;
+  setTimeout(function() {
+    this.readyState = SockJS.CLOSED;
+
+    if (forceFail) {
+      this.dispatchEvent(new Event('error'));
+    }
+
+    var e = new CloseEvent('close');
+    e.wasClean = wasClean || false;
+    e.code = code || 1000;
+    e.reason = reason;
+
+    this.dispatchEvent(e);
+    this.onmessage = this.onclose = this.onerror = null;
+    debug('disconnected');
+  }.bind(this), 0);
+};
+
+// See: http://www.erg.abdn.ac.uk/~gerrit/dccp/notes/ccid2/rto_estimator/
+// and RFC 2988.
+SockJS.prototype.countRTO = function(rtt) {
+  // In a local environment, when using IE8/9 and the `jsonp-polling`
+  // transport the time needed to establish a connection (the time that pass
+  // from the opening of the transport to the call of `_dispatchOpen`) is
+  // around 200msec (the lower bound used in the article above) and this
+  // causes spurious timeouts. For this reason we calculate a value slightly
+  // larger than that used in the article.
+  if (rtt > 100) {
+    return 4 * rtt; // rto > 400msec
+  }
+  return 300 + rtt; // 300msec < rto <= 400msec
+};
+
+module.exports = function(availableTransports) {
+  transports = transport(availableTransports);
+  __webpack_require__(/*! ./iframe-bootstrap */ "./node_modules/sockjs-client/lib/iframe-bootstrap.js")(SockJS, availableTransports);
+  return SockJS;
+};
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/shims.js":
+/*!*************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/shims.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* eslint-disable */
+/* jscs: disable */
+
+
+// pulled specific shims from https://github.com/es-shims/es5-shim
+
+var ArrayPrototype = Array.prototype;
+var ObjectPrototype = Object.prototype;
+var FunctionPrototype = Function.prototype;
+var StringPrototype = String.prototype;
+var array_slice = ArrayPrototype.slice;
+
+var _toString = ObjectPrototype.toString;
+var isFunction = function (val) {
+    return ObjectPrototype.toString.call(val) === '[object Function]';
+};
+var isArray = function isArray(obj) {
+    return _toString.call(obj) === '[object Array]';
+};
+var isString = function isString(obj) {
+    return _toString.call(obj) === '[object String]';
+};
+
+var supportsDescriptors = Object.defineProperty && (function () {
+    try {
+        Object.defineProperty({}, 'x', {});
+        return true;
+    } catch (e) { /* this is ES3 */
+        return false;
+    }
+}());
+
+// Define configurable, writable and non-enumerable props
+// if they don't exist.
+var defineProperty;
+if (supportsDescriptors) {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        Object.defineProperty(object, name, {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: method
+        });
+    };
+} else {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        object[name] = method;
+    };
+}
+var defineProperties = function (object, map, forceAssign) {
+    for (var name in map) {
+        if (ObjectPrototype.hasOwnProperty.call(map, name)) {
+          defineProperty(object, name, map[name], forceAssign);
+        }
+    }
+};
+
+var toObject = function (o) {
+    if (o == null) { // this matches both null and undefined
+        throw new TypeError("can't convert " + o + ' to object');
+    }
+    return Object(o);
+};
+
+//
+// Util
+// ======
+//
+
+// ES5 9.4
+// http://es5.github.com/#x9.4
+// http://jsperf.com/to-integer
+
+function toInteger(num) {
+    var n = +num;
+    if (n !== n) { // isNaN
+        n = 0;
+    } else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0)) {
+        n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    }
+    return n;
+}
+
+function ToUint32(x) {
+    return x >>> 0;
+}
+
+//
+// Function
+// ========
+//
+
+// ES-5 15.3.4.5
+// http://es5.github.com/#x15.3.4.5
+
+function Empty() {}
+
+defineProperties(FunctionPrototype, {
+    bind: function bind(that) { // .length is 1
+        // 1. Let Target be the this value.
+        var target = this;
+        // 2. If IsCallable(Target) is false, throw a TypeError exception.
+        if (!isFunction(target)) {
+            throw new TypeError('Function.prototype.bind called on incompatible ' + target);
+        }
+        // 3. Let A be a new (possibly empty) internal list of all of the
+        //   argument values provided after thisArg (arg1, arg2 etc), in order.
+        // XXX slicedArgs will stand in for "A" if used
+        var args = array_slice.call(arguments, 1); // for normal call
+        // 4. Let F be a new native ECMAScript object.
+        // 11. Set the [[Prototype]] internal property of F to the standard
+        //   built-in Function prototype object as specified in 15.3.3.1.
+        // 12. Set the [[Call]] internal property of F as described in
+        //   15.3.4.5.1.
+        // 13. Set the [[Construct]] internal property of F as described in
+        //   15.3.4.5.2.
+        // 14. Set the [[HasInstance]] internal property of F as described in
+        //   15.3.4.5.3.
+        var binder = function () {
+
+            if (this instanceof bound) {
+                // 15.3.4.5.2 [[Construct]]
+                // When the [[Construct]] internal method of a function object,
+                // F that was created using the bind function is called with a
+                // list of arguments ExtraArgs, the following steps are taken:
+                // 1. Let target be the value of F's [[TargetFunction]]
+                //   internal property.
+                // 2. If target has no [[Construct]] internal method, a
+                //   TypeError exception is thrown.
+                // 3. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Construct]] internal
+                //   method of target providing args as the arguments.
+
+                var result = target.apply(
+                    this,
+                    args.concat(array_slice.call(arguments))
+                );
+                if (Object(result) === result) {
+                    return result;
+                }
+                return this;
+
+            } else {
+                // 15.3.4.5.1 [[Call]]
+                // When the [[Call]] internal method of a function object, F,
+                // which was created using the bind function is called with a
+                // this value and a list of arguments ExtraArgs, the following
+                // steps are taken:
+                // 1. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 2. Let boundThis be the value of F's [[BoundThis]] internal
+                //   property.
+                // 3. Let target be the value of F's [[TargetFunction]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Call]] internal method
+                //   of target providing boundThis as the this value and
+                //   providing args as the arguments.
+
+                // equiv: target.call(this, ...boundArgs, ...args)
+                return target.apply(
+                    that,
+                    args.concat(array_slice.call(arguments))
+                );
+
+            }
+
+        };
+
+        // 15. If the [[Class]] internal property of Target is "Function", then
+        //     a. Let L be the length property of Target minus the length of A.
+        //     b. Set the length own property of F to either 0 or L, whichever is
+        //       larger.
+        // 16. Else set the length own property of F to 0.
+
+        var boundLength = Math.max(0, target.length - args.length);
+
+        // 17. Set the attributes of the length own property of F to the values
+        //   specified in 15.3.5.1.
+        var boundArgs = [];
+        for (var i = 0; i < boundLength; i++) {
+            boundArgs.push('$' + i);
+        }
+
+        // XXX Build a dynamic function with desired amount of arguments is the only
+        // way to set the length property of a function.
+        // In environments where Content Security Policies enabled (Chrome extensions,
+        // for ex.) all use of eval or Function costructor throws an exception.
+        // However in all of these environments Function.prototype.bind exists
+        // and so this code will never be executed.
+        var bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this, arguments); }')(binder);
+
+        if (target.prototype) {
+            Empty.prototype = target.prototype;
+            bound.prototype = new Empty();
+            // Clean up dangling references.
+            Empty.prototype = null;
+        }
+
+        // TODO
+        // 18. Set the [[Extensible]] internal property of F to true.
+
+        // TODO
+        // 19. Let thrower be the [[ThrowTypeError]] function Object (13.2.3).
+        // 20. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "caller", PropertyDescriptor {[[Get]]: thrower, [[Set]]:
+        //   thrower, [[Enumerable]]: false, [[Configurable]]: false}, and
+        //   false.
+        // 21. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "arguments", PropertyDescriptor {[[Get]]: thrower,
+        //   [[Set]]: thrower, [[Enumerable]]: false, [[Configurable]]: false},
+        //   and false.
+
+        // TODO
+        // NOTE Function objects created using Function.prototype.bind do not
+        // have a prototype property or the [[Code]], [[FormalParameters]], and
+        // [[Scope]] internal properties.
+        // XXX can't delete prototype in pure-js.
+
+        // 22. Return F.
+        return bound;
+    }
+});
+
+//
+// Array
+// =====
+//
+
+// ES5 15.4.3.2
+// http://es5.github.com/#x15.4.3.2
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
+defineProperties(Array, { isArray: isArray });
+
+
+var boxedString = Object('a');
+var splitString = boxedString[0] !== 'a' || !(0 in boxedString);
+
+var properlyBoxesContext = function properlyBoxed(method) {
+    // Check node 0.6.21 bug where third parameter is not boxed
+    var properlyBoxesNonStrict = true;
+    var properlyBoxesStrict = true;
+    if (method) {
+        method.call('foo', function (_, __, context) {
+            if (typeof context !== 'object') { properlyBoxesNonStrict = false; }
+        });
+
+        method.call([1], function () {
+            'use strict';
+            properlyBoxesStrict = typeof this === 'string';
+        }, 'x');
+    }
+    return !!method && properlyBoxesNonStrict && properlyBoxesStrict;
+};
+
+defineProperties(ArrayPrototype, {
+    forEach: function forEach(fun /*, thisp*/) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            thisp = arguments[1],
+            i = -1,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(); // TODO message
+        }
+
+        while (++i < length) {
+            if (i in self) {
+                // Invoke the callback function with call, passing arguments:
+                // context, property value, property key, thisArg object
+                // context
+                fun.call(thisp, self[i], i, object);
+            }
+        }
+    }
+}, !properlyBoxesContext(ArrayPrototype.forEach));
+
+// ES5 15.4.4.14
+// http://es5.github.com/#x15.4.4.14
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+var hasFirefox2IndexOfBug = Array.prototype.indexOf && [0, 1].indexOf(1, 2) !== -1;
+defineProperties(ArrayPrototype, {
+    indexOf: function indexOf(sought /*, fromIndex */ ) {
+        var self = splitString && isString(this) ? this.split('') : toObject(this),
+            length = self.length >>> 0;
+
+        if (!length) {
+            return -1;
+        }
+
+        var i = 0;
+        if (arguments.length > 1) {
+            i = toInteger(arguments[1]);
+        }
+
+        // handle negative indices
+        i = i >= 0 ? i : Math.max(0, length + i);
+        for (; i < length; i++) {
+            if (i in self && self[i] === sought) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}, hasFirefox2IndexOfBug);
+
+//
+// String
+// ======
+//
+
+// ES5 15.5.4.14
+// http://es5.github.com/#x15.5.4.14
+
+// [bugfix, IE lt 9, firefox 4, Konqueror, Opera, obscure browsers]
+// Many browsers do not split properly with regular expressions or they
+// do not perform the split correctly under obscure conditions.
+// See http://blog.stevenlevithan.com/archives/cross-browser-split
+// I've tested in many browsers and this seems to cover the deviant ones:
+//    'ab'.split(/(?:ab)*/) should be ["", ""], not [""]
+//    '.'.split(/(.?)(.?)/) should be ["", ".", "", ""], not ["", ""]
+//    'tesst'.split(/(s)*/) should be ["t", undefined, "e", "s", "t"], not
+//       [undefined, "t", undefined, "e", ...]
+//    ''.split(/.?/) should be [], not [""]
+//    '.'.split(/()()/) should be ["."], not ["", "", "."]
+
+var string_split = StringPrototype.split;
+if (
+    'ab'.split(/(?:ab)*/).length !== 2 ||
+    '.'.split(/(.?)(.?)/).length !== 4 ||
+    'tesst'.split(/(s)*/)[1] === 't' ||
+    'test'.split(/(?:)/, -1).length !== 4 ||
+    ''.split(/.?/).length ||
+    '.'.split(/()()/).length > 1
+) {
+    (function () {
+        var compliantExecNpcg = /()??/.exec('')[1] === void 0; // NPCG: nonparticipating capturing group
+
+        StringPrototype.split = function (separator, limit) {
+            var string = this;
+            if (separator === void 0 && limit === 0) {
+                return [];
+            }
+
+            // If `separator` is not a regex, use native split
+            if (_toString.call(separator) !== '[object RegExp]') {
+                return string_split.call(this, separator, limit);
+            }
+
+            var output = [],
+                flags = (separator.ignoreCase ? 'i' : '') +
+                        (separator.multiline  ? 'm' : '') +
+                        (separator.extended   ? 'x' : '') + // Proposed for ES6
+                        (separator.sticky     ? 'y' : ''), // Firefox 3+
+                lastLastIndex = 0,
+                // Make `global` and avoid `lastIndex` issues by working with a copy
+                separator2, match, lastIndex, lastLength;
+            separator = new RegExp(separator.source, flags + 'g');
+            string += ''; // Type-convert
+            if (!compliantExecNpcg) {
+                // Doesn't need flags gy, but they don't hurt
+                separator2 = new RegExp('^' + separator.source + '$(?!\\s)', flags);
+            }
+            /* Values for `limit`, per the spec:
+             * If undefined: 4294967295 // Math.pow(2, 32) - 1
+             * If 0, Infinity, or NaN: 0
+             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+             * If other: Type-convert, then use the above rules
+             */
+            limit = limit === void 0 ?
+                -1 >>> 0 : // Math.pow(2, 32) - 1
+                ToUint32(limit);
+            while (match = separator.exec(string)) {
+                // `separator.lastIndex` is not reliable cross-browser
+                lastIndex = match.index + match[0].length;
+                if (lastIndex > lastLastIndex) {
+                    output.push(string.slice(lastLastIndex, match.index));
+                    // Fix browsers whose `exec` methods don't consistently return `undefined` for
+                    // nonparticipating capturing groups
+                    if (!compliantExecNpcg && match.length > 1) {
+                        match[0].replace(separator2, function () {
+                            for (var i = 1; i < arguments.length - 2; i++) {
+                                if (arguments[i] === void 0) {
+                                    match[i] = void 0;
+                                }
+                            }
+                        });
+                    }
+                    if (match.length > 1 && match.index < string.length) {
+                        ArrayPrototype.push.apply(output, match.slice(1));
+                    }
+                    lastLength = match[0].length;
+                    lastLastIndex = lastIndex;
+                    if (output.length >= limit) {
+                        break;
+                    }
+                }
+                if (separator.lastIndex === match.index) {
+                    separator.lastIndex++; // Avoid an infinite loop
+                }
+            }
+            if (lastLastIndex === string.length) {
+                if (lastLength || !separator.test('')) {
+                    output.push('');
+                }
+            } else {
+                output.push(string.slice(lastLastIndex));
+            }
+            return output.length > limit ? output.slice(0, limit) : output;
+        };
+    }());
+
+// [bugfix, chrome]
+// If separator is undefined, then the result array contains just one String,
+// which is the this value (converted to a String). If limit is not undefined,
+// then the output array is truncated so that it contains no more than limit
+// elements.
+// "0".split(undefined, 0) -> []
+} else if ('0'.split(void 0, 0).length) {
+    StringPrototype.split = function split(separator, limit) {
+        if (separator === void 0 && limit === 0) { return []; }
+        return string_split.call(this, separator, limit);
+    };
+}
+
+// ECMA-262, 3rd B.2.3
+// Not an ECMAScript standard, although ECMAScript 3rd Edition has a
+// non-normative section suggesting uniform semantics and it should be
+// normalized across all browsers
+// [bugfix, IE lt 9] IE < 9 substr() with negative value not working in IE
+var string_substr = StringPrototype.substr;
+var hasNegativeSubstrBug = ''.substr && '0b'.substr(-1) !== 'b';
+defineProperties(StringPrototype, {
+    substr: function substr(start, length) {
+        return string_substr.call(
+            this,
+            start < 0 ? ((start = this.length + start) < 0 ? 0 : start) : start,
+            length
+        );
+    }
+}, hasNegativeSubstrBug);
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport-list.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport-list.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = [
+  // streaming transports
+  __webpack_require__(/*! ./transport/websocket */ "./node_modules/sockjs-client/lib/transport/websocket.js")
+, __webpack_require__(/*! ./transport/xhr-streaming */ "./node_modules/sockjs-client/lib/transport/xhr-streaming.js")
+, __webpack_require__(/*! ./transport/xdr-streaming */ "./node_modules/sockjs-client/lib/transport/xdr-streaming.js")
+, __webpack_require__(/*! ./transport/eventsource */ "./node_modules/sockjs-client/lib/transport/eventsource.js")
+, __webpack_require__(/*! ./transport/lib/iframe-wrap */ "./node_modules/sockjs-client/lib/transport/lib/iframe-wrap.js")(__webpack_require__(/*! ./transport/eventsource */ "./node_modules/sockjs-client/lib/transport/eventsource.js"))
+
+  // polling transports
+, __webpack_require__(/*! ./transport/htmlfile */ "./node_modules/sockjs-client/lib/transport/htmlfile.js")
+, __webpack_require__(/*! ./transport/lib/iframe-wrap */ "./node_modules/sockjs-client/lib/transport/lib/iframe-wrap.js")(__webpack_require__(/*! ./transport/htmlfile */ "./node_modules/sockjs-client/lib/transport/htmlfile.js"))
+, __webpack_require__(/*! ./transport/xhr-polling */ "./node_modules/sockjs-client/lib/transport/xhr-polling.js")
+, __webpack_require__(/*! ./transport/xdr-polling */ "./node_modules/sockjs-client/lib/transport/xdr-polling.js")
+, __webpack_require__(/*! ./transport/lib/iframe-wrap */ "./node_modules/sockjs-client/lib/transport/lib/iframe-wrap.js")(__webpack_require__(/*! ./transport/xhr-polling */ "./node_modules/sockjs-client/lib/transport/xhr-polling.js"))
+, __webpack_require__(/*! ./transport/jsonp-polling */ "./node_modules/sockjs-client/lib/transport/jsonp-polling.js")
+];
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/browser/abstract-xhr.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/browser/abstract-xhr.js ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , utils = __webpack_require__(/*! ../../utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , XHR = global.XMLHttpRequest
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:browser:xhr');
+}
+
+function AbstractXHRObject(method, url, payload, opts) {
+  debug(method, url);
+  var self = this;
+  EventEmitter.call(this);
+
+  setTimeout(function () {
+    self._start(method, url, payload, opts);
+  }, 0);
+}
+
+inherits(AbstractXHRObject, EventEmitter);
+
+AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+  var self = this;
+
+  try {
+    this.xhr = new XHR();
+  } catch (x) {
+    // intentionally empty
+  }
+
+  if (!this.xhr) {
+    debug('no xhr');
+    this.emit('finish', 0, 'no xhr support');
+    this._cleanup();
+    return;
+  }
+
+  // several browsers cache POSTs
+  url = urlUtils.addQuery(url, 't=' + (+new Date()));
+
+  // Explorer tends to keep connection open, even after the
+  // tab gets closed: http://bugs.jquery.com/ticket/5280
+  this.unloadRef = utils.unloadAdd(function() {
+    debug('unload cleanup');
+    self._cleanup(true);
+  });
+  try {
+    this.xhr.open(method, url, true);
+    if (this.timeout && 'timeout' in this.xhr) {
+      this.xhr.timeout = this.timeout;
+      this.xhr.ontimeout = function() {
+        debug('xhr timeout');
+        self.emit('finish', 0, '');
+        self._cleanup(false);
+      };
+    }
+  } catch (e) {
+    debug('exception', e);
+    // IE raises an exception on wrong port.
+    this.emit('finish', 0, '');
+    this._cleanup(false);
+    return;
+  }
+
+  if ((!opts || !opts.noCredentials) && AbstractXHRObject.supportsCORS) {
+    debug('withCredentials');
+    // Mozilla docs says https://developer.mozilla.org/en/XMLHttpRequest :
+    // "This never affects same-site requests."
+
+    this.xhr.withCredentials = true;
+  }
+  if (opts && opts.headers) {
+    for (var key in opts.headers) {
+      this.xhr.setRequestHeader(key, opts.headers[key]);
+    }
+  }
+
+  this.xhr.onreadystatechange = function() {
+    if (self.xhr) {
+      var x = self.xhr;
+      var text, status;
+      debug('readyState', x.readyState);
+      switch (x.readyState) {
+      case 3:
+        // IE doesn't like peeking into responseText or status
+        // on Microsoft.XMLHTTP and readystate=3
+        try {
+          status = x.status;
+          text = x.responseText;
+        } catch (e) {
+          // intentionally empty
+        }
+        debug('status', status);
+        // IE returns 1223 for 204: http://bugs.jquery.com/ticket/1450
+        if (status === 1223) {
+          status = 204;
+        }
+
+        // IE does return readystate == 3 for 404 answers.
+        if (status === 200 && text && text.length > 0) {
+          debug('chunk');
+          self.emit('chunk', status, text);
+        }
+        break;
+      case 4:
+        status = x.status;
+        debug('status', status);
+        // IE returns 1223 for 204: http://bugs.jquery.com/ticket/1450
+        if (status === 1223) {
+          status = 204;
+        }
+        // IE returns this for a bad port
+        // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383770(v=vs.85).aspx
+        if (status === 12005 || status === 12029) {
+          status = 0;
+        }
+
+        debug('finish', status, x.responseText);
+        self.emit('finish', status, x.responseText);
+        self._cleanup(false);
+        break;
+      }
+    }
+  };
+
+  try {
+    self.xhr.send(payload);
+  } catch (e) {
+    self.emit('finish', 0, '');
+    self._cleanup(false);
+  }
+};
+
+AbstractXHRObject.prototype._cleanup = function(abort) {
+  debug('cleanup');
+  if (!this.xhr) {
+    return;
+  }
+  this.removeAllListeners();
+  utils.unloadDel(this.unloadRef);
+
+  // IE needs this field to be a function
+  this.xhr.onreadystatechange = function() {};
+  if (this.xhr.ontimeout) {
+    this.xhr.ontimeout = null;
+  }
+
+  if (abort) {
+    try {
+      this.xhr.abort();
+    } catch (x) {
+      // intentionally empty
+    }
+  }
+  this.unloadRef = this.xhr = null;
+};
+
+AbstractXHRObject.prototype.close = function() {
+  debug('close');
+  this._cleanup(true);
+};
+
+AbstractXHRObject.enabled = !!XHR;
+// override XMLHttpRequest for IE6/7
+// obfuscate to avoid firewalls
+var axo = ['Active'].concat('Object').join('X');
+if (!AbstractXHRObject.enabled && (axo in global)) {
+  debug('overriding xmlhttprequest');
+  XHR = function() {
+    try {
+      return new global[axo]('Microsoft.XMLHTTP');
+    } catch (e) {
+      return null;
+    }
+  };
+  AbstractXHRObject.enabled = !!new XHR();
+}
+
+var cors = false;
+try {
+  cors = 'withCredentials' in new XHR();
+} catch (ignored) {
+  // intentionally empty
+}
+
+AbstractXHRObject.supportsCORS = cors;
+
+module.exports = AbstractXHRObject;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/browser/eventsource.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/browser/eventsource.js ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {module.exports = global.EventSource;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/browser/websocket.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/browser/websocket.js ***!
+  \***********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var Driver = global.WebSocket || global.MozWebSocket;
+if (Driver) {
+	module.exports = function WebSocketBrowserDriver(url) {
+		return new Driver(url);
+	};
+} else {
+	module.exports = undefined;
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/eventsource.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/eventsource.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  , EventSourceReceiver = __webpack_require__(/*! ./receiver/eventsource */ "./node_modules/sockjs-client/lib/transport/receiver/eventsource.js")
+  , XHRCorsObject = __webpack_require__(/*! ./sender/xhr-cors */ "./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js")
+  , EventSourceDriver = __webpack_require__(/*! eventsource */ "./node_modules/sockjs-client/lib/transport/browser/eventsource.js")
+  ;
+
+function EventSourceTransport(transUrl) {
+  if (!EventSourceTransport.enabled()) {
+    throw new Error('Transport created when disabled');
+  }
+
+  AjaxBasedTransport.call(this, transUrl, '/eventsource', EventSourceReceiver, XHRCorsObject);
+}
+
+inherits(EventSourceTransport, AjaxBasedTransport);
+
+EventSourceTransport.enabled = function() {
+  return !!EventSourceDriver;
+};
+
+EventSourceTransport.transportName = 'eventsource';
+EventSourceTransport.roundTrips = 2;
+
+module.exports = EventSourceTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/htmlfile.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/htmlfile.js ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , HtmlfileReceiver = __webpack_require__(/*! ./receiver/htmlfile */ "./node_modules/sockjs-client/lib/transport/receiver/htmlfile.js")
+  , XHRLocalObject = __webpack_require__(/*! ./sender/xhr-local */ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  ;
+
+function HtmlFileTransport(transUrl) {
+  if (!HtmlfileReceiver.enabled) {
+    throw new Error('Transport created when disabled');
+  }
+  AjaxBasedTransport.call(this, transUrl, '/htmlfile', HtmlfileReceiver, XHRLocalObject);
+}
+
+inherits(HtmlFileTransport, AjaxBasedTransport);
+
+HtmlFileTransport.enabled = function(info) {
+  return HtmlfileReceiver.enabled && info.sameOrigin;
+};
+
+HtmlFileTransport.transportName = 'htmlfile';
+HtmlFileTransport.roundTrips = 2;
+
+module.exports = HtmlFileTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/iframe.js":
+/*!************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/iframe.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// Few cool transports do work only for same-origin. In order to make
+// them work cross-domain we shall use iframe, served from the
+// remote domain. New browsers have capabilities to communicate with
+// cross domain iframe using postMessage(). In IE it was implemented
+// from IE 8+, but of course, IE got some details wrong:
+//    http://msdn.microsoft.com/en-us/library/cc197015(v=VS.85).aspx
+//    http://stevesouders.com/misc/test-postmessage.php
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , version = __webpack_require__(/*! ../version */ "./node_modules/sockjs-client/lib/version.js")
+  , urlUtils = __webpack_require__(/*! ../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , iframeUtils = __webpack_require__(/*! ../utils/iframe */ "./node_modules/sockjs-client/lib/utils/iframe.js")
+  , eventUtils = __webpack_require__(/*! ../utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , random = __webpack_require__(/*! ../utils/random */ "./node_modules/sockjs-client/lib/utils/random.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:transport:iframe');
+}
+
+function IframeTransport(transport, transUrl, baseUrl) {
+  if (!IframeTransport.enabled()) {
+    throw new Error('Transport created when disabled');
+  }
+  EventEmitter.call(this);
+
+  var self = this;
+  this.origin = urlUtils.getOrigin(baseUrl);
+  this.baseUrl = baseUrl;
+  this.transUrl = transUrl;
+  this.transport = transport;
+  this.windowId = random.string(8);
+
+  var iframeUrl = urlUtils.addPath(baseUrl, '/iframe.html') + '#' + this.windowId;
+  debug(transport, transUrl, iframeUrl);
+
+  this.iframeObj = iframeUtils.createIframe(iframeUrl, function(r) {
+    debug('err callback');
+    self.emit('close', 1006, 'Unable to load an iframe (' + r + ')');
+    self.close();
+  });
+
+  this.onmessageCallback = this._message.bind(this);
+  eventUtils.attachEvent('message', this.onmessageCallback);
+}
+
+inherits(IframeTransport, EventEmitter);
+
+IframeTransport.prototype.close = function() {
+  debug('close');
+  this.removeAllListeners();
+  if (this.iframeObj) {
+    eventUtils.detachEvent('message', this.onmessageCallback);
+    try {
+      // When the iframe is not loaded, IE raises an exception
+      // on 'contentWindow'.
+      this.postMessage('c');
+    } catch (x) {
+      // intentionally empty
+    }
+    this.iframeObj.cleanup();
+    this.iframeObj = null;
+    this.onmessageCallback = this.iframeObj = null;
+  }
+};
+
+IframeTransport.prototype._message = function(e) {
+  debug('message', e.data);
+  if (!urlUtils.isOriginEqual(e.origin, this.origin)) {
+    debug('not same origin', e.origin, this.origin);
+    return;
+  }
+
+  var iframeMessage;
+  try {
+    iframeMessage = JSON3.parse(e.data);
+  } catch (ignored) {
+    debug('bad json', e.data);
+    return;
+  }
+
+  if (iframeMessage.windowId !== this.windowId) {
+    debug('mismatched window id', iframeMessage.windowId, this.windowId);
+    return;
+  }
+
+  switch (iframeMessage.type) {
+  case 's':
+    this.iframeObj.loaded();
+    // window global dependency
+    this.postMessage('s', JSON3.stringify([
+      version
+    , this.transport
+    , this.transUrl
+    , this.baseUrl
+    ]));
+    break;
+  case 't':
+    this.emit('message', iframeMessage.data);
+    break;
+  case 'c':
+    var cdata;
+    try {
+      cdata = JSON3.parse(iframeMessage.data);
+    } catch (ignored) {
+      debug('bad json', iframeMessage.data);
+      return;
+    }
+    this.emit('close', cdata[0], cdata[1]);
+    this.close();
+    break;
+  }
+};
+
+IframeTransport.prototype.postMessage = function(type, data) {
+  debug('postMessage', type, data);
+  this.iframeObj.post(JSON3.stringify({
+    windowId: this.windowId
+  , type: type
+  , data: data || ''
+  }), this.origin);
+};
+
+IframeTransport.prototype.send = function(message) {
+  debug('send', message);
+  this.postMessage('m', message);
+};
+
+IframeTransport.enabled = function() {
+  return iframeUtils.iframeEnabled;
+};
+
+IframeTransport.transportName = 'iframe';
+IframeTransport.roundTrips = 2;
+
+module.exports = IframeTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/jsonp-polling.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/jsonp-polling.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+// The simplest and most robust transport, using the well-know cross
+// domain hack - JSONP. This transport is quite inefficient - one
+// message could use up to one http request. But at least it works almost
+// everywhere.
+// Known limitations:
+//   o you will get a spinning cursor
+//   o for Konqueror a dumb timer is needed to detect errors
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , SenderReceiver = __webpack_require__(/*! ./lib/sender-receiver */ "./node_modules/sockjs-client/lib/transport/lib/sender-receiver.js")
+  , JsonpReceiver = __webpack_require__(/*! ./receiver/jsonp */ "./node_modules/sockjs-client/lib/transport/receiver/jsonp.js")
+  , jsonpSender = __webpack_require__(/*! ./sender/jsonp */ "./node_modules/sockjs-client/lib/transport/sender/jsonp.js")
+  ;
+
+function JsonPTransport(transUrl) {
+  if (!JsonPTransport.enabled()) {
+    throw new Error('Transport created when disabled');
+  }
+  SenderReceiver.call(this, transUrl, '/jsonp', jsonpSender, JsonpReceiver);
+}
+
+inherits(JsonPTransport, SenderReceiver);
+
+JsonPTransport.enabled = function() {
+  return !!global.document;
+};
+
+JsonPTransport.transportName = 'jsonp-polling';
+JsonPTransport.roundTrips = 1;
+JsonPTransport.needBody = true;
+
+module.exports = JsonPTransport;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/lib/ajax-based.js ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , SenderReceiver = __webpack_require__(/*! ./sender-receiver */ "./node_modules/sockjs-client/lib/transport/lib/sender-receiver.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:ajax-based');
+}
+
+function createAjaxSender(AjaxObject) {
+  return function(url, payload, callback) {
+    debug('create ajax sender', url, payload);
+    var opt = {};
+    if (typeof payload === 'string') {
+      opt.headers = {'Content-type': 'text/plain'};
+    }
+    var ajaxUrl = urlUtils.addPath(url, '/xhr_send');
+    var xo = new AjaxObject('POST', ajaxUrl, payload, opt);
+    xo.once('finish', function(status) {
+      debug('finish', status);
+      xo = null;
+
+      if (status !== 200 && status !== 204) {
+        return callback(new Error('http status ' + status));
+      }
+      callback();
+    });
+    return function() {
+      debug('abort');
+      xo.close();
+      xo = null;
+
+      var err = new Error('Aborted');
+      err.code = 1000;
+      callback(err);
+    };
+  };
+}
+
+function AjaxBasedTransport(transUrl, urlSuffix, Receiver, AjaxObject) {
+  SenderReceiver.call(this, transUrl, urlSuffix, createAjaxSender(AjaxObject), Receiver, AjaxObject);
+}
+
+inherits(AjaxBasedTransport, SenderReceiver);
+
+module.exports = AjaxBasedTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/lib/buffered-sender.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/lib/buffered-sender.js ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:buffered-sender');
+}
+
+function BufferedSender(url, sender) {
+  debug(url);
+  EventEmitter.call(this);
+  this.sendBuffer = [];
+  this.sender = sender;
+  this.url = url;
+}
+
+inherits(BufferedSender, EventEmitter);
+
+BufferedSender.prototype.send = function(message) {
+  debug('send', message);
+  this.sendBuffer.push(message);
+  if (!this.sendStop) {
+    this.sendSchedule();
+  }
+};
+
+// For polling transports in a situation when in the message callback,
+// new message is being send. If the sending connection was started
+// before receiving one, it is possible to saturate the network and
+// timeout due to the lack of receiving socket. To avoid that we delay
+// sending messages by some small time, in order to let receiving
+// connection be started beforehand. This is only a halfmeasure and
+// does not fix the big problem, but it does make the tests go more
+// stable on slow networks.
+BufferedSender.prototype.sendScheduleWait = function() {
+  debug('sendScheduleWait');
+  var self = this;
+  var tref;
+  this.sendStop = function() {
+    debug('sendStop');
+    self.sendStop = null;
+    clearTimeout(tref);
+  };
+  tref = setTimeout(function() {
+    debug('timeout');
+    self.sendStop = null;
+    self.sendSchedule();
+  }, 25);
+};
+
+BufferedSender.prototype.sendSchedule = function() {
+  debug('sendSchedule', this.sendBuffer.length);
+  var self = this;
+  if (this.sendBuffer.length > 0) {
+    var payload = '[' + this.sendBuffer.join(',') + ']';
+    this.sendStop = this.sender(this.url, payload, function(err) {
+      self.sendStop = null;
+      if (err) {
+        debug('error', err);
+        self.emit('close', err.code || 1006, 'Sending error: ' + err);
+        self.close();
+      } else {
+        self.sendScheduleWait();
+      }
+    });
+    this.sendBuffer = [];
+  }
+};
+
+BufferedSender.prototype._cleanup = function() {
+  debug('_cleanup');
+  this.removeAllListeners();
+};
+
+BufferedSender.prototype.close = function() {
+  debug('close');
+  this._cleanup();
+  if (this.sendStop) {
+    this.sendStop();
+    this.sendStop = null;
+  }
+};
+
+module.exports = BufferedSender;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/lib/iframe-wrap.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/lib/iframe-wrap.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , IframeTransport = __webpack_require__(/*! ../iframe */ "./node_modules/sockjs-client/lib/transport/iframe.js")
+  , objectUtils = __webpack_require__(/*! ../../utils/object */ "./node_modules/sockjs-client/lib/utils/object.js")
+  ;
+
+module.exports = function(transport) {
+
+  function IframeWrapTransport(transUrl, baseUrl) {
+    IframeTransport.call(this, transport.transportName, transUrl, baseUrl);
+  }
+
+  inherits(IframeWrapTransport, IframeTransport);
+
+  IframeWrapTransport.enabled = function(url, info) {
+    if (!global.document) {
+      return false;
+    }
+
+    var iframeInfo = objectUtils.extend({}, info);
+    iframeInfo.sameOrigin = true;
+    return transport.enabled(iframeInfo) && IframeTransport.enabled();
+  };
+
+  IframeWrapTransport.transportName = 'iframe-' + transport.transportName;
+  IframeWrapTransport.needBody = true;
+  IframeWrapTransport.roundTrips = IframeTransport.roundTrips + transport.roundTrips - 1; // html, javascript (2) + transport - no CORS (1)
+
+  IframeWrapTransport.facadeTransport = transport;
+
+  return IframeWrapTransport;
+};
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/lib/polling.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/lib/polling.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:polling');
+}
+
+function Polling(Receiver, receiveUrl, AjaxObject) {
+  debug(receiveUrl);
+  EventEmitter.call(this);
+  this.Receiver = Receiver;
+  this.receiveUrl = receiveUrl;
+  this.AjaxObject = AjaxObject;
+  this._scheduleReceiver();
+}
+
+inherits(Polling, EventEmitter);
+
+Polling.prototype._scheduleReceiver = function() {
+  debug('_scheduleReceiver');
+  var self = this;
+  var poll = this.poll = new this.Receiver(this.receiveUrl, this.AjaxObject);
+
+  poll.on('message', function(msg) {
+    debug('message', msg);
+    self.emit('message', msg);
+  });
+
+  poll.once('close', function(code, reason) {
+    debug('close', code, reason, self.pollIsClosing);
+    self.poll = poll = null;
+
+    if (!self.pollIsClosing) {
+      if (reason === 'network') {
+        self._scheduleReceiver();
+      } else {
+        self.emit('close', code || 1006, reason);
+        self.removeAllListeners();
+      }
+    }
+  });
+};
+
+Polling.prototype.abort = function() {
+  debug('abort');
+  this.removeAllListeners();
+  this.pollIsClosing = true;
+  if (this.poll) {
+    this.poll.abort();
+  }
+};
+
+module.exports = Polling;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/lib/sender-receiver.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/lib/sender-receiver.js ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , BufferedSender = __webpack_require__(/*! ./buffered-sender */ "./node_modules/sockjs-client/lib/transport/lib/buffered-sender.js")
+  , Polling = __webpack_require__(/*! ./polling */ "./node_modules/sockjs-client/lib/transport/lib/polling.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:sender-receiver');
+}
+
+function SenderReceiver(transUrl, urlSuffix, senderFunc, Receiver, AjaxObject) {
+  var pollUrl = urlUtils.addPath(transUrl, urlSuffix);
+  debug(pollUrl);
+  var self = this;
+  BufferedSender.call(this, transUrl, senderFunc);
+
+  this.poll = new Polling(Receiver, pollUrl, AjaxObject);
+  this.poll.on('message', function(msg) {
+    debug('poll message', msg);
+    self.emit('message', msg);
+  });
+  this.poll.once('close', function(code, reason) {
+    debug('poll close', code, reason);
+    self.poll = null;
+    self.emit('close', code, reason);
+    self.close();
+  });
+}
+
+inherits(SenderReceiver, BufferedSender);
+
+SenderReceiver.prototype.close = function() {
+  BufferedSender.prototype.close.call(this);
+  debug('close');
+  this.removeAllListeners();
+  if (this.poll) {
+    this.poll.abort();
+    this.poll = null;
+  }
+};
+
+module.exports = SenderReceiver;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/receiver/eventsource.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/receiver/eventsource.js ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , EventSourceDriver = __webpack_require__(/*! eventsource */ "./node_modules/sockjs-client/lib/transport/browser/eventsource.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:receiver:eventsource');
+}
+
+function EventSourceReceiver(url) {
+  debug(url);
+  EventEmitter.call(this);
+
+  var self = this;
+  var es = this.es = new EventSourceDriver(url);
+  es.onmessage = function(e) {
+    debug('message', e.data);
+    self.emit('message', decodeURI(e.data));
+  };
+  es.onerror = function(e) {
+    debug('error', es.readyState, e);
+    // ES on reconnection has readyState = 0 or 1.
+    // on network error it's CLOSED = 2
+    var reason = (es.readyState !== 2 ? 'network' : 'permanent');
+    self._cleanup();
+    self._close(reason);
+  };
+}
+
+inherits(EventSourceReceiver, EventEmitter);
+
+EventSourceReceiver.prototype.abort = function() {
+  debug('abort');
+  this._cleanup();
+  this._close('user');
+};
+
+EventSourceReceiver.prototype._cleanup = function() {
+  debug('cleanup');
+  var es = this.es;
+  if (es) {
+    es.onmessage = es.onerror = null;
+    es.close();
+    this.es = null;
+  }
+};
+
+EventSourceReceiver.prototype._close = function(reason) {
+  debug('close', reason);
+  var self = this;
+  // Safari and chrome < 15 crash if we close window before
+  // waiting for ES cleanup. See:
+  // https://code.google.com/p/chromium/issues/detail?id=89155
+  setTimeout(function() {
+    self.emit('close', null, reason);
+    self.removeAllListeners();
+  }, 200);
+};
+
+module.exports = EventSourceReceiver;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/receiver/htmlfile.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/receiver/htmlfile.js ***!
+  \***********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , iframeUtils = __webpack_require__(/*! ../../utils/iframe */ "./node_modules/sockjs-client/lib/utils/iframe.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , random = __webpack_require__(/*! ../../utils/random */ "./node_modules/sockjs-client/lib/utils/random.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:receiver:htmlfile');
+}
+
+function HtmlfileReceiver(url) {
+  debug(url);
+  EventEmitter.call(this);
+  var self = this;
+  iframeUtils.polluteGlobalNamespace();
+
+  this.id = 'a' + random.string(6);
+  url = urlUtils.addQuery(url, 'c=' + decodeURIComponent(iframeUtils.WPrefix + '.' + this.id));
+
+  debug('using htmlfile', HtmlfileReceiver.htmlfileEnabled);
+  var constructFunc = HtmlfileReceiver.htmlfileEnabled ?
+      iframeUtils.createHtmlfile : iframeUtils.createIframe;
+
+  global[iframeUtils.WPrefix][this.id] = {
+    start: function() {
+      debug('start');
+      self.iframeObj.loaded();
+    }
+  , message: function(data) {
+      debug('message', data);
+      self.emit('message', data);
+    }
+  , stop: function() {
+      debug('stop');
+      self._cleanup();
+      self._close('network');
+    }
+  };
+  this.iframeObj = constructFunc(url, function() {
+    debug('callback');
+    self._cleanup();
+    self._close('permanent');
+  });
+}
+
+inherits(HtmlfileReceiver, EventEmitter);
+
+HtmlfileReceiver.prototype.abort = function() {
+  debug('abort');
+  this._cleanup();
+  this._close('user');
+};
+
+HtmlfileReceiver.prototype._cleanup = function() {
+  debug('_cleanup');
+  if (this.iframeObj) {
+    this.iframeObj.cleanup();
+    this.iframeObj = null;
+  }
+  delete global[iframeUtils.WPrefix][this.id];
+};
+
+HtmlfileReceiver.prototype._close = function(reason) {
+  debug('_close', reason);
+  this.emit('close', null, reason);
+  this.removeAllListeners();
+};
+
+HtmlfileReceiver.htmlfileEnabled = false;
+
+// obfuscate to avoid firewalls
+var axo = ['Active'].concat('Object').join('X');
+if (axo in global) {
+  try {
+    HtmlfileReceiver.htmlfileEnabled = !!new global[axo]('htmlfile');
+  } catch (x) {
+    // intentionally empty
+  }
+}
+
+HtmlfileReceiver.enabled = HtmlfileReceiver.htmlfileEnabled || iframeUtils.iframeEnabled;
+
+module.exports = HtmlfileReceiver;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/receiver/jsonp.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/receiver/jsonp.js ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var utils = __webpack_require__(/*! ../../utils/iframe */ "./node_modules/sockjs-client/lib/utils/iframe.js")
+  , random = __webpack_require__(/*! ../../utils/random */ "./node_modules/sockjs-client/lib/utils/random.js")
+  , browser = __webpack_require__(/*! ../../utils/browser */ "./node_modules/sockjs-client/lib/utils/browser.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:receiver:jsonp');
+}
+
+function JsonpReceiver(url) {
+  debug(url);
+  var self = this;
+  EventEmitter.call(this);
+
+  utils.polluteGlobalNamespace();
+
+  this.id = 'a' + random.string(6);
+  var urlWithId = urlUtils.addQuery(url, 'c=' + encodeURIComponent(utils.WPrefix + '.' + this.id));
+
+  global[utils.WPrefix][this.id] = this._callback.bind(this);
+  this._createScript(urlWithId);
+
+  // Fallback mostly for Konqueror - stupid timer, 35 seconds shall be plenty.
+  this.timeoutId = setTimeout(function() {
+    debug('timeout');
+    self._abort(new Error('JSONP script loaded abnormally (timeout)'));
+  }, JsonpReceiver.timeout);
+}
+
+inherits(JsonpReceiver, EventEmitter);
+
+JsonpReceiver.prototype.abort = function() {
+  debug('abort');
+  if (global[utils.WPrefix][this.id]) {
+    var err = new Error('JSONP user aborted read');
+    err.code = 1000;
+    this._abort(err);
+  }
+};
+
+JsonpReceiver.timeout = 35000;
+JsonpReceiver.scriptErrorTimeout = 1000;
+
+JsonpReceiver.prototype._callback = function(data) {
+  debug('_callback', data);
+  this._cleanup();
+
+  if (this.aborting) {
+    return;
+  }
+
+  if (data) {
+    debug('message', data);
+    this.emit('message', data);
+  }
+  this.emit('close', null, 'network');
+  this.removeAllListeners();
+};
+
+JsonpReceiver.prototype._abort = function(err) {
+  debug('_abort', err);
+  this._cleanup();
+  this.aborting = true;
+  this.emit('close', err.code, err.message);
+  this.removeAllListeners();
+};
+
+JsonpReceiver.prototype._cleanup = function() {
+  debug('_cleanup');
+  clearTimeout(this.timeoutId);
+  if (this.script2) {
+    this.script2.parentNode.removeChild(this.script2);
+    this.script2 = null;
+  }
+  if (this.script) {
+    var script = this.script;
+    // Unfortunately, you can't really abort script loading of
+    // the script.
+    script.parentNode.removeChild(script);
+    script.onreadystatechange = script.onerror =
+        script.onload = script.onclick = null;
+    this.script = null;
+  }
+  delete global[utils.WPrefix][this.id];
+};
+
+JsonpReceiver.prototype._scriptError = function() {
+  debug('_scriptError');
+  var self = this;
+  if (this.errorTimer) {
+    return;
+  }
+
+  this.errorTimer = setTimeout(function() {
+    if (!self.loadedOkay) {
+      self._abort(new Error('JSONP script loaded abnormally (onerror)'));
+    }
+  }, JsonpReceiver.scriptErrorTimeout);
+};
+
+JsonpReceiver.prototype._createScript = function(url) {
+  debug('_createScript', url);
+  var self = this;
+  var script = this.script = global.document.createElement('script');
+  var script2;  // Opera synchronous load trick.
+
+  script.id = 'a' + random.string(8);
+  script.src = url;
+  script.type = 'text/javascript';
+  script.charset = 'UTF-8';
+  script.onerror = this._scriptError.bind(this);
+  script.onload = function() {
+    debug('onload');
+    self._abort(new Error('JSONP script loaded abnormally (onload)'));
+  };
+
+  // IE9 fires 'error' event after onreadystatechange or before, in random order.
+  // Use loadedOkay to determine if actually errored
+  script.onreadystatechange = function() {
+    debug('onreadystatechange', script.readyState);
+    if (/loaded|closed/.test(script.readyState)) {
+      if (script && script.htmlFor && script.onclick) {
+        self.loadedOkay = true;
+        try {
+          // In IE, actually execute the script.
+          script.onclick();
+        } catch (x) {
+          // intentionally empty
+        }
+      }
+      if (script) {
+        self._abort(new Error('JSONP script loaded abnormally (onreadystatechange)'));
+      }
+    }
+  };
+  // IE: event/htmlFor/onclick trick.
+  // One can't rely on proper order for onreadystatechange. In order to
+  // make sure, set a 'htmlFor' and 'event' properties, so that
+  // script code will be installed as 'onclick' handler for the
+  // script object. Later, onreadystatechange, manually execute this
+  // code. FF and Chrome doesn't work with 'event' and 'htmlFor'
+  // set. For reference see:
+  //   http://jaubourg.net/2010/07/loading-script-as-onclick-handler-of.html
+  // Also, read on that about script ordering:
+  //   http://wiki.whatwg.org/wiki/Dynamic_Script_Execution_Order
+  if (typeof script.async === 'undefined' && global.document.attachEvent) {
+    // According to mozilla docs, in recent browsers script.async defaults
+    // to 'true', so we may use it to detect a good browser:
+    // https://developer.mozilla.org/en/HTML/Element/script
+    if (!browser.isOpera()) {
+      // Naively assume we're in IE
+      try {
+        script.htmlFor = script.id;
+        script.event = 'onclick';
+      } catch (x) {
+        // intentionally empty
+      }
+      script.async = true;
+    } else {
+      // Opera, second sync script hack
+      script2 = this.script2 = global.document.createElement('script');
+      script2.text = "try{var a = document.getElementById('" + script.id + "'); if(a)a.onerror();}catch(x){};";
+      script.async = script2.async = false;
+    }
+  }
+  if (typeof script.async !== 'undefined') {
+    script.async = true;
+  }
+
+  var head = global.document.getElementsByTagName('head')[0];
+  head.insertBefore(script, head.firstChild);
+  if (script2) {
+    head.insertBefore(script2, head.firstChild);
+  }
+};
+
+module.exports = JsonpReceiver;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/receiver/xhr.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/receiver/xhr.js ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:receiver:xhr');
+}
+
+function XhrReceiver(url, AjaxObject) {
+  debug(url);
+  EventEmitter.call(this);
+  var self = this;
+
+  this.bufferPosition = 0;
+
+  this.xo = new AjaxObject('POST', url, null);
+  this.xo.on('chunk', this._chunkHandler.bind(this));
+  this.xo.once('finish', function(status, text) {
+    debug('finish', status, text);
+    self._chunkHandler(status, text);
+    self.xo = null;
+    var reason = status === 200 ? 'network' : 'permanent';
+    debug('close', reason);
+    self.emit('close', null, reason);
+    self._cleanup();
+  });
+}
+
+inherits(XhrReceiver, EventEmitter);
+
+XhrReceiver.prototype._chunkHandler = function(status, text) {
+  debug('_chunkHandler', status);
+  if (status !== 200 || !text) {
+    return;
+  }
+
+  for (var idx = -1; ; this.bufferPosition += idx + 1) {
+    var buf = text.slice(this.bufferPosition);
+    idx = buf.indexOf('\n');
+    if (idx === -1) {
+      break;
+    }
+    var msg = buf.slice(0, idx);
+    if (msg) {
+      debug('message', msg);
+      this.emit('message', msg);
+    }
+  }
+};
+
+XhrReceiver.prototype._cleanup = function() {
+  debug('_cleanup');
+  this.removeAllListeners();
+};
+
+XhrReceiver.prototype.abort = function() {
+  debug('abort');
+  if (this.xo) {
+    this.xo.close();
+    debug('close');
+    this.emit('close', null, 'user');
+    this.xo = null;
+  }
+  this._cleanup();
+};
+
+module.exports = XhrReceiver;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/sender/jsonp.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/sender/jsonp.js ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var random = __webpack_require__(/*! ../../utils/random */ "./node_modules/sockjs-client/lib/utils/random.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:sender:jsonp');
+}
+
+var form, area;
+
+function createIframe(id) {
+  debug('createIframe', id);
+  try {
+    // ie6 dynamic iframes with target="" support (thanks Chris Lambacher)
+    return global.document.createElement('<iframe name="' + id + '">');
+  } catch (x) {
+    var iframe = global.document.createElement('iframe');
+    iframe.name = id;
+    return iframe;
+  }
+}
+
+function createForm() {
+  debug('createForm');
+  form = global.document.createElement('form');
+  form.style.display = 'none';
+  form.style.position = 'absolute';
+  form.method = 'POST';
+  form.enctype = 'application/x-www-form-urlencoded';
+  form.acceptCharset = 'UTF-8';
+
+  area = global.document.createElement('textarea');
+  area.name = 'd';
+  form.appendChild(area);
+
+  global.document.body.appendChild(form);
+}
+
+module.exports = function(url, payload, callback) {
+  debug(url, payload);
+  if (!form) {
+    createForm();
+  }
+  var id = 'a' + random.string(8);
+  form.target = id;
+  form.action = urlUtils.addQuery(urlUtils.addPath(url, '/jsonp_send'), 'i=' + id);
+
+  var iframe = createIframe(id);
+  iframe.id = id;
+  iframe.style.display = 'none';
+  form.appendChild(iframe);
+
+  try {
+    area.value = payload;
+  } catch (e) {
+    // seriously broken browsers get here
+  }
+  form.submit();
+
+  var completed = function(err) {
+    debug('completed', id, err);
+    if (!iframe.onerror) {
+      return;
+    }
+    iframe.onreadystatechange = iframe.onerror = iframe.onload = null;
+    // Opera mini doesn't like if we GC iframe
+    // immediately, thus this timeout.
+    setTimeout(function() {
+      debug('cleaning up', id);
+      iframe.parentNode.removeChild(iframe);
+      iframe = null;
+    }, 500);
+    area.value = '';
+    // It is not possible to detect if the iframe succeeded or
+    // failed to submit our form.
+    callback(err);
+  };
+  iframe.onerror = function() {
+    debug('onerror', id);
+    completed();
+  };
+  iframe.onload = function() {
+    debug('onload', id);
+    completed();
+  };
+  iframe.onreadystatechange = function(e) {
+    debug('onreadystatechange', id, iframe.readyState, e);
+    if (iframe.readyState === 'complete') {
+      completed();
+    }
+  };
+  return function() {
+    debug('aborted', id);
+    completed(new Error('Aborted'));
+  };
+};
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/sender/xdr.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/sender/xdr.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , eventUtils = __webpack_require__(/*! ../../utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , browser = __webpack_require__(/*! ../../utils/browser */ "./node_modules/sockjs-client/lib/utils/browser.js")
+  , urlUtils = __webpack_require__(/*! ../../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:sender:xdr');
+}
+
+// References:
+//   http://ajaxian.com/archives/100-line-ajax-wrapper
+//   http://msdn.microsoft.com/en-us/library/cc288060(v=VS.85).aspx
+
+function XDRObject(method, url, payload) {
+  debug(method, url);
+  var self = this;
+  EventEmitter.call(this);
+
+  setTimeout(function() {
+    self._start(method, url, payload);
+  }, 0);
+}
+
+inherits(XDRObject, EventEmitter);
+
+XDRObject.prototype._start = function(method, url, payload) {
+  debug('_start');
+  var self = this;
+  var xdr = new global.XDomainRequest();
+  // IE caches even POSTs
+  url = urlUtils.addQuery(url, 't=' + (+new Date()));
+
+  xdr.onerror = function() {
+    debug('onerror');
+    self._error();
+  };
+  xdr.ontimeout = function() {
+    debug('ontimeout');
+    self._error();
+  };
+  xdr.onprogress = function() {
+    debug('progress', xdr.responseText);
+    self.emit('chunk', 200, xdr.responseText);
+  };
+  xdr.onload = function() {
+    debug('load');
+    self.emit('finish', 200, xdr.responseText);
+    self._cleanup(false);
+  };
+  this.xdr = xdr;
+  this.unloadRef = eventUtils.unloadAdd(function() {
+    self._cleanup(true);
+  });
+  try {
+    // Fails with AccessDenied if port number is bogus
+    this.xdr.open(method, url);
+    if (this.timeout) {
+      this.xdr.timeout = this.timeout;
+    }
+    this.xdr.send(payload);
+  } catch (x) {
+    this._error();
+  }
+};
+
+XDRObject.prototype._error = function() {
+  this.emit('finish', 0, '');
+  this._cleanup(false);
+};
+
+XDRObject.prototype._cleanup = function(abort) {
+  debug('cleanup', abort);
+  if (!this.xdr) {
+    return;
+  }
+  this.removeAllListeners();
+  eventUtils.unloadDel(this.unloadRef);
+
+  this.xdr.ontimeout = this.xdr.onerror = this.xdr.onprogress = this.xdr.onload = null;
+  if (abort) {
+    try {
+      this.xdr.abort();
+    } catch (x) {
+      // intentionally empty
+    }
+  }
+  this.unloadRef = this.xdr = null;
+};
+
+XDRObject.prototype.close = function() {
+  debug('close');
+  this._cleanup(true);
+};
+
+// IE 8/9 if the request target uses the same scheme - #79
+XDRObject.enabled = !!(global.XDomainRequest && browser.hasDomain());
+
+module.exports = XDRObject;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , XhrDriver = __webpack_require__(/*! ../driver/xhr */ "./node_modules/sockjs-client/lib/transport/browser/abstract-xhr.js")
+  ;
+
+function XHRCorsObject(method, url, payload, opts) {
+  XhrDriver.call(this, method, url, payload, opts);
+}
+
+inherits(XHRCorsObject, XhrDriver);
+
+XHRCorsObject.enabled = XhrDriver.enabled && XhrDriver.supportsCORS;
+
+module.exports = XHRCorsObject;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/sender/xhr-fake.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/sender/xhr-fake.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  ;
+
+function XHRFake(/* method, url, payload, opts */) {
+  var self = this;
+  EventEmitter.call(this);
+
+  this.to = setTimeout(function() {
+    self.emit('finish', 200, '{}');
+  }, XHRFake.timeout);
+}
+
+inherits(XHRFake, EventEmitter);
+
+XHRFake.prototype.close = function() {
+  clearTimeout(this.to);
+};
+
+XHRFake.timeout = 2000;
+
+module.exports = XHRFake;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js":
+/*!**********************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/sender/xhr-local.js ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , XhrDriver = __webpack_require__(/*! ../driver/xhr */ "./node_modules/sockjs-client/lib/transport/browser/abstract-xhr.js")
+  ;
+
+function XHRLocalObject(method, url, payload /*, opts */) {
+  XhrDriver.call(this, method, url, payload, {
+    noCredentials: true
+  });
+}
+
+inherits(XHRLocalObject, XhrDriver);
+
+XHRLocalObject.enabled = XhrDriver.enabled;
+
+module.exports = XHRLocalObject;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/websocket.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/websocket.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils/event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , urlUtils = __webpack_require__(/*! ../utils/url */ "./node_modules/sockjs-client/lib/utils/url.js")
+  , inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , EventEmitter = __webpack_require__(/*! events */ "./node_modules/sockjs-client/lib/event/emitter.js").EventEmitter
+  , WebsocketDriver = __webpack_require__(/*! ./driver/websocket */ "./node_modules/sockjs-client/lib/transport/browser/websocket.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:websocket');
+}
+
+function WebSocketTransport(transUrl, ignore, options) {
+  if (!WebSocketTransport.enabled()) {
+    throw new Error('Transport created when disabled');
+  }
+
+  EventEmitter.call(this);
+  debug('constructor', transUrl);
+
+  var self = this;
+  var url = urlUtils.addPath(transUrl, '/websocket');
+  if (url.slice(0, 5) === 'https') {
+    url = 'wss' + url.slice(5);
+  } else {
+    url = 'ws' + url.slice(4);
+  }
+  this.url = url;
+
+  this.ws = new WebsocketDriver(this.url, [], options);
+  this.ws.onmessage = function(e) {
+    debug('message event', e.data);
+    self.emit('message', e.data);
+  };
+  // Firefox has an interesting bug. If a websocket connection is
+  // created after onunload, it stays alive even when user
+  // navigates away from the page. In such situation let's lie -
+  // let's not open the ws connection at all. See:
+  // https://github.com/sockjs/sockjs-client/issues/28
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=696085
+  this.unloadRef = utils.unloadAdd(function() {
+    debug('unload');
+    self.ws.close();
+  });
+  this.ws.onclose = function(e) {
+    debug('close event', e.code, e.reason);
+    self.emit('close', e.code, e.reason);
+    self._cleanup();
+  };
+  this.ws.onerror = function(e) {
+    debug('error event', e);
+    self.emit('close', 1006, 'WebSocket connection broken');
+    self._cleanup();
+  };
+}
+
+inherits(WebSocketTransport, EventEmitter);
+
+WebSocketTransport.prototype.send = function(data) {
+  var msg = '[' + data + ']';
+  debug('send', msg);
+  this.ws.send(msg);
+};
+
+WebSocketTransport.prototype.close = function() {
+  debug('close');
+  var ws = this.ws;
+  this._cleanup();
+  if (ws) {
+    ws.close();
+  }
+};
+
+WebSocketTransport.prototype._cleanup = function() {
+  debug('_cleanup');
+  var ws = this.ws;
+  if (ws) {
+    ws.onmessage = ws.onclose = ws.onerror = null;
+  }
+  utils.unloadDel(this.unloadRef);
+  this.unloadRef = this.ws = null;
+  this.removeAllListeners();
+};
+
+WebSocketTransport.enabled = function() {
+  debug('enabled');
+  return !!WebsocketDriver;
+};
+WebSocketTransport.transportName = 'websocket';
+
+// In theory, ws should require 1 round trip. But in chrome, this is
+// not very stable over SSL. Most likely a ws connection requires a
+// separate SSL connection, in which case 2 round trips are an
+// absolute minumum.
+WebSocketTransport.roundTrips = 2;
+
+module.exports = WebSocketTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/xdr-polling.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/xdr-polling.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  , XdrStreamingTransport = __webpack_require__(/*! ./xdr-streaming */ "./node_modules/sockjs-client/lib/transport/xdr-streaming.js")
+  , XhrReceiver = __webpack_require__(/*! ./receiver/xhr */ "./node_modules/sockjs-client/lib/transport/receiver/xhr.js")
+  , XDRObject = __webpack_require__(/*! ./sender/xdr */ "./node_modules/sockjs-client/lib/transport/sender/xdr.js")
+  ;
+
+function XdrPollingTransport(transUrl) {
+  if (!XDRObject.enabled) {
+    throw new Error('Transport created when disabled');
+  }
+  AjaxBasedTransport.call(this, transUrl, '/xhr', XhrReceiver, XDRObject);
+}
+
+inherits(XdrPollingTransport, AjaxBasedTransport);
+
+XdrPollingTransport.enabled = XdrStreamingTransport.enabled;
+XdrPollingTransport.transportName = 'xdr-polling';
+XdrPollingTransport.roundTrips = 2; // preflight, ajax
+
+module.exports = XdrPollingTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/xdr-streaming.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/xdr-streaming.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  , XhrReceiver = __webpack_require__(/*! ./receiver/xhr */ "./node_modules/sockjs-client/lib/transport/receiver/xhr.js")
+  , XDRObject = __webpack_require__(/*! ./sender/xdr */ "./node_modules/sockjs-client/lib/transport/sender/xdr.js")
+  ;
+
+// According to:
+//   http://stackoverflow.com/questions/1641507/detect-browser-support-for-cross-domain-xmlhttprequests
+//   http://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/
+
+function XdrStreamingTransport(transUrl) {
+  if (!XDRObject.enabled) {
+    throw new Error('Transport created when disabled');
+  }
+  AjaxBasedTransport.call(this, transUrl, '/xhr_streaming', XhrReceiver, XDRObject);
+}
+
+inherits(XdrStreamingTransport, AjaxBasedTransport);
+
+XdrStreamingTransport.enabled = function(info) {
+  if (info.cookie_needed || info.nullOrigin) {
+    return false;
+  }
+  return XDRObject.enabled && info.sameScheme;
+};
+
+XdrStreamingTransport.transportName = 'xdr-streaming';
+XdrStreamingTransport.roundTrips = 2; // preflight, ajax
+
+module.exports = XdrStreamingTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/xhr-polling.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/xhr-polling.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  , XhrReceiver = __webpack_require__(/*! ./receiver/xhr */ "./node_modules/sockjs-client/lib/transport/receiver/xhr.js")
+  , XHRCorsObject = __webpack_require__(/*! ./sender/xhr-cors */ "./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js")
+  , XHRLocalObject = __webpack_require__(/*! ./sender/xhr-local */ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js")
+  ;
+
+function XhrPollingTransport(transUrl) {
+  if (!XHRLocalObject.enabled && !XHRCorsObject.enabled) {
+    throw new Error('Transport created when disabled');
+  }
+  AjaxBasedTransport.call(this, transUrl, '/xhr', XhrReceiver, XHRCorsObject);
+}
+
+inherits(XhrPollingTransport, AjaxBasedTransport);
+
+XhrPollingTransport.enabled = function(info) {
+  if (info.nullOrigin) {
+    return false;
+  }
+
+  if (XHRLocalObject.enabled && info.sameOrigin) {
+    return true;
+  }
+  return XHRCorsObject.enabled;
+};
+
+XhrPollingTransport.transportName = 'xhr-polling';
+XhrPollingTransport.roundTrips = 2; // preflight, ajax
+
+module.exports = XhrPollingTransport;
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/transport/xhr-streaming.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/transport/xhr-streaming.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js")
+  , AjaxBasedTransport = __webpack_require__(/*! ./lib/ajax-based */ "./node_modules/sockjs-client/lib/transport/lib/ajax-based.js")
+  , XhrReceiver = __webpack_require__(/*! ./receiver/xhr */ "./node_modules/sockjs-client/lib/transport/receiver/xhr.js")
+  , XHRCorsObject = __webpack_require__(/*! ./sender/xhr-cors */ "./node_modules/sockjs-client/lib/transport/sender/xhr-cors.js")
+  , XHRLocalObject = __webpack_require__(/*! ./sender/xhr-local */ "./node_modules/sockjs-client/lib/transport/sender/xhr-local.js")
+  , browser = __webpack_require__(/*! ../utils/browser */ "./node_modules/sockjs-client/lib/utils/browser.js")
+  ;
+
+function XhrStreamingTransport(transUrl) {
+  if (!XHRLocalObject.enabled && !XHRCorsObject.enabled) {
+    throw new Error('Transport created when disabled');
+  }
+  AjaxBasedTransport.call(this, transUrl, '/xhr_streaming', XhrReceiver, XHRCorsObject);
+}
+
+inherits(XhrStreamingTransport, AjaxBasedTransport);
+
+XhrStreamingTransport.enabled = function(info) {
+  if (info.nullOrigin) {
+    return false;
+  }
+  // Opera doesn't support xhr-streaming #60
+  // But it might be able to #92
+  if (browser.isOpera()) {
+    return false;
+  }
+
+  return XHRCorsObject.enabled;
+};
+
+XhrStreamingTransport.transportName = 'xhr-streaming';
+XhrStreamingTransport.roundTrips = 2; // preflight, ajax
+
+// Safari gets confused when a streaming ajax request is started
+// before onload. This causes the load indicator to spin indefinetely.
+// Only require body when used in a browser
+XhrStreamingTransport.needBody = !!global.document;
+
+module.exports = XhrStreamingTransport;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/browser-crypto.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/browser-crypto.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+if (global.crypto && global.crypto.getRandomValues) {
+  module.exports.randomBytes = function(length) {
+    var bytes = new Uint8Array(length);
+    global.crypto.getRandomValues(bytes);
+    return bytes;
+  };
+} else {
+  module.exports.randomBytes = function(length) {
+    var bytes = new Array(length);
+    for (var i = 0; i < length; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+    return bytes;
+  };
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/browser.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/browser.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+module.exports = {
+  isOpera: function() {
+    return global.navigator &&
+      /opera/i.test(global.navigator.userAgent);
+  }
+
+, isKonqueror: function() {
+    return global.navigator &&
+      /konqueror/i.test(global.navigator.userAgent);
+  }
+
+  // #187 wrap document.domain in try/catch because of WP8 from file:///
+, hasDomain: function () {
+    // non-browser client always has a domain
+    if (!global.document) {
+      return true;
+    }
+
+    try {
+      return !!global.document.domain;
+    } catch (e) {
+      return false;
+    }
+  }
+};
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/escape.js":
+/*!********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/escape.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js");
+
+// Some extra characters that Chrome gets wrong, and substitutes with
+// something else on the wire.
+// eslint-disable-next-line no-control-regex
+var extraEscapable = /[\x00-\x1f\ud800-\udfff\ufffe\uffff\u0300-\u0333\u033d-\u0346\u034a-\u034c\u0350-\u0352\u0357-\u0358\u035c-\u0362\u0374\u037e\u0387\u0591-\u05af\u05c4\u0610-\u0617\u0653-\u0654\u0657-\u065b\u065d-\u065e\u06df-\u06e2\u06eb-\u06ec\u0730\u0732-\u0733\u0735-\u0736\u073a\u073d\u073f-\u0741\u0743\u0745\u0747\u07eb-\u07f1\u0951\u0958-\u095f\u09dc-\u09dd\u09df\u0a33\u0a36\u0a59-\u0a5b\u0a5e\u0b5c-\u0b5d\u0e38-\u0e39\u0f43\u0f4d\u0f52\u0f57\u0f5c\u0f69\u0f72-\u0f76\u0f78\u0f80-\u0f83\u0f93\u0f9d\u0fa2\u0fa7\u0fac\u0fb9\u1939-\u193a\u1a17\u1b6b\u1cda-\u1cdb\u1dc0-\u1dcf\u1dfc\u1dfe\u1f71\u1f73\u1f75\u1f77\u1f79\u1f7b\u1f7d\u1fbb\u1fbe\u1fc9\u1fcb\u1fd3\u1fdb\u1fe3\u1feb\u1fee-\u1fef\u1ff9\u1ffb\u1ffd\u2000-\u2001\u20d0-\u20d1\u20d4-\u20d7\u20e7-\u20e9\u2126\u212a-\u212b\u2329-\u232a\u2adc\u302b-\u302c\uaab2-\uaab3\uf900-\ufa0d\ufa10\ufa12\ufa15-\ufa1e\ufa20\ufa22\ufa25-\ufa26\ufa2a-\ufa2d\ufa30-\ufa6d\ufa70-\ufad9\ufb1d\ufb1f\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufb4e\ufff0-\uffff]/g
+  , extraLookup;
+
+// This may be quite slow, so let's delay until user actually uses bad
+// characters.
+var unrollLookup = function(escapable) {
+  var i;
+  var unrolled = {};
+  var c = [];
+  for (i = 0; i < 65536; i++) {
+    c.push( String.fromCharCode(i) );
+  }
+  escapable.lastIndex = 0;
+  c.join('').replace(escapable, function(a) {
+    unrolled[ a ] = '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+    return '';
+  });
+  escapable.lastIndex = 0;
+  return unrolled;
+};
+
+// Quote string, also taking care of unicode characters that browsers
+// often break. Especially, take care of unicode surrogates:
+// http://en.wikipedia.org/wiki/Mapping_of_Unicode_characters#Surrogates
+module.exports = {
+  quote: function(string) {
+    var quoted = JSON3.stringify(string);
+
+    // In most cases this should be very fast and good enough.
+    extraEscapable.lastIndex = 0;
+    if (!extraEscapable.test(quoted)) {
+      return quoted;
+    }
+
+    if (!extraLookup) {
+      extraLookup = unrollLookup(extraEscapable);
+    }
+
+    return quoted.replace(extraEscapable, function(a) {
+      return extraLookup[a];
+    });
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/event.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/event.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var random = __webpack_require__(/*! ./random */ "./node_modules/sockjs-client/lib/utils/random.js");
+
+var onUnload = {}
+  , afterUnload = false
+    // detect google chrome packaged apps because they don't allow the 'unload' event
+  , isChromePackagedApp = global.chrome && global.chrome.app && global.chrome.app.runtime
+  ;
+
+module.exports = {
+  attachEvent: function(event, listener) {
+    if (typeof global.addEventListener !== 'undefined') {
+      global.addEventListener(event, listener, false);
+    } else if (global.document && global.attachEvent) {
+      // IE quirks.
+      // According to: http://stevesouders.com/misc/test-postmessage.php
+      // the message gets delivered only to 'document', not 'window'.
+      global.document.attachEvent('on' + event, listener);
+      // I get 'window' for ie8.
+      global.attachEvent('on' + event, listener);
+    }
+  }
+
+, detachEvent: function(event, listener) {
+    if (typeof global.addEventListener !== 'undefined') {
+      global.removeEventListener(event, listener, false);
+    } else if (global.document && global.detachEvent) {
+      global.document.detachEvent('on' + event, listener);
+      global.detachEvent('on' + event, listener);
+    }
+  }
+
+, unloadAdd: function(listener) {
+    if (isChromePackagedApp) {
+      return null;
+    }
+
+    var ref = random.string(8);
+    onUnload[ref] = listener;
+    if (afterUnload) {
+      setTimeout(this.triggerUnloadCallbacks, 0);
+    }
+    return ref;
+  }
+
+, unloadDel: function(ref) {
+    if (ref in onUnload) {
+      delete onUnload[ref];
+    }
+  }
+
+, triggerUnloadCallbacks: function() {
+    for (var ref in onUnload) {
+      onUnload[ref]();
+      delete onUnload[ref];
+    }
+  }
+};
+
+var unloadTriggered = function() {
+  if (afterUnload) {
+    return;
+  }
+  afterUnload = true;
+  module.exports.triggerUnloadCallbacks();
+};
+
+// 'unload' alone is not reliable in opera within an iframe, but we
+// can't use `beforeunload` as IE fires it on javascript: links.
+if (!isChromePackagedApp) {
+  module.exports.attachEvent('unload', unloadTriggered);
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/iframe.js":
+/*!********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/iframe.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var eventUtils = __webpack_require__(/*! ./event */ "./node_modules/sockjs-client/lib/utils/event.js")
+  , JSON3 = __webpack_require__(/*! json3 */ "./node_modules/json3/lib/json3.js")
+  , browser = __webpack_require__(/*! ./browser */ "./node_modules/sockjs-client/lib/utils/browser.js")
+  ;
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:utils:iframe');
+}
+
+module.exports = {
+  WPrefix: '_jp'
+, currentWindowId: null
+
+, polluteGlobalNamespace: function() {
+    if (!(module.exports.WPrefix in global)) {
+      global[module.exports.WPrefix] = {};
+    }
+  }
+
+, postMessage: function(type, data) {
+    if (global.parent !== global) {
+      global.parent.postMessage(JSON3.stringify({
+        windowId: module.exports.currentWindowId
+      , type: type
+      , data: data || ''
+      }), '*');
+    } else {
+      debug('Cannot postMessage, no parent window.', type, data);
+    }
+  }
+
+, createIframe: function(iframeUrl, errorCallback) {
+    var iframe = global.document.createElement('iframe');
+    var tref, unloadRef;
+    var unattach = function() {
+      debug('unattach');
+      clearTimeout(tref);
+      // Explorer had problems with that.
+      try {
+        iframe.onload = null;
+      } catch (x) {
+        // intentionally empty
+      }
+      iframe.onerror = null;
+    };
+    var cleanup = function() {
+      debug('cleanup');
+      if (iframe) {
+        unattach();
+        // This timeout makes chrome fire onbeforeunload event
+        // within iframe. Without the timeout it goes straight to
+        // onunload.
+        setTimeout(function() {
+          if (iframe) {
+            iframe.parentNode.removeChild(iframe);
+          }
+          iframe = null;
+        }, 0);
+        eventUtils.unloadDel(unloadRef);
+      }
+    };
+    var onerror = function(err) {
+      debug('onerror', err);
+      if (iframe) {
+        cleanup();
+        errorCallback(err);
+      }
+    };
+    var post = function(msg, origin) {
+      debug('post', msg, origin);
+      setTimeout(function() {
+        try {
+          // When the iframe is not loaded, IE raises an exception
+          // on 'contentWindow'.
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(msg, origin);
+          }
+        } catch (x) {
+          // intentionally empty
+        }
+      }, 0);
+    };
+
+    iframe.src = iframeUrl;
+    iframe.style.display = 'none';
+    iframe.style.position = 'absolute';
+    iframe.onerror = function() {
+      onerror('onerror');
+    };
+    iframe.onload = function() {
+      debug('onload');
+      // `onload` is triggered before scripts on the iframe are
+      // executed. Give it few seconds to actually load stuff.
+      clearTimeout(tref);
+      tref = setTimeout(function() {
+        onerror('onload timeout');
+      }, 2000);
+    };
+    global.document.body.appendChild(iframe);
+    tref = setTimeout(function() {
+      onerror('timeout');
+    }, 15000);
+    unloadRef = eventUtils.unloadAdd(cleanup);
+    return {
+      post: post
+    , cleanup: cleanup
+    , loaded: unattach
+    };
+  }
+
+/* eslint no-undef: "off", new-cap: "off" */
+, createHtmlfile: function(iframeUrl, errorCallback) {
+    var axo = ['Active'].concat('Object').join('X');
+    var doc = new global[axo]('htmlfile');
+    var tref, unloadRef;
+    var iframe;
+    var unattach = function() {
+      clearTimeout(tref);
+      iframe.onerror = null;
+    };
+    var cleanup = function() {
+      if (doc) {
+        unattach();
+        eventUtils.unloadDel(unloadRef);
+        iframe.parentNode.removeChild(iframe);
+        iframe = doc = null;
+        CollectGarbage();
+      }
+    };
+    var onerror = function(r) {
+      debug('onerror', r);
+      if (doc) {
+        cleanup();
+        errorCallback(r);
+      }
+    };
+    var post = function(msg, origin) {
+      try {
+        // When the iframe is not loaded, IE raises an exception
+        // on 'contentWindow'.
+        setTimeout(function() {
+          if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(msg, origin);
+          }
+        }, 0);
+      } catch (x) {
+        // intentionally empty
+      }
+    };
+
+    doc.open();
+    doc.write('<html><s' + 'cript>' +
+              'document.domain="' + global.document.domain + '";' +
+              '</s' + 'cript></html>');
+    doc.close();
+    doc.parentWindow[module.exports.WPrefix] = global[module.exports.WPrefix];
+    var c = doc.createElement('div');
+    doc.body.appendChild(c);
+    iframe = doc.createElement('iframe');
+    c.appendChild(iframe);
+    iframe.src = iframeUrl;
+    iframe.onerror = function() {
+      onerror('onerror');
+    };
+    tref = setTimeout(function() {
+      onerror('timeout');
+    }, 15000);
+    unloadRef = eventUtils.unloadAdd(cleanup);
+    return {
+      post: post
+    , cleanup: cleanup
+    , loaded: unattach
+    };
+  }
+};
+
+module.exports.iframeEnabled = false;
+if (global.document) {
+  // postMessage misbehaves in konqueror 4.6.5 - the messages are delivered with
+  // huge delay, or not at all.
+  module.exports.iframeEnabled = (typeof global.postMessage === 'function' ||
+    typeof global.postMessage === 'object') && (!browser.isKonqueror());
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/log.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/log.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var logObject = {};
+['log', 'debug', 'warn'].forEach(function (level) {
+  var levelExists;
+
+  try {
+    levelExists = global.console && global.console[level] && global.console[level].apply;
+  } catch(e) {
+    // do nothing
+  }
+
+  logObject[level] = levelExists ? function () {
+    return global.console[level].apply(global.console, arguments);
+  } : (level === 'log' ? function () {} : logObject.log);
+});
+
+module.exports = logObject;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/object.js":
+/*!********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/object.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  isObject: function(obj) {
+    var type = typeof obj;
+    return type === 'function' || type === 'object' && !!obj;
+  }
+
+, extend: function(obj) {
+    if (!this.isObject(obj)) {
+      return obj;
+    }
+    var source, prop;
+    for (var i = 1, length = arguments.length; i < length; i++) {
+      source = arguments[i];
+      for (prop in source) {
+        if (Object.prototype.hasOwnProperty.call(source, prop)) {
+          obj[prop] = source[prop];
+        }
+      }
+    }
+    return obj;
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/random.js":
+/*!********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/random.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/* global crypto:true */
+var crypto = __webpack_require__(/*! crypto */ "./node_modules/sockjs-client/lib/utils/browser-crypto.js");
+
+// This string has length 32, a power of 2, so the modulus doesn't introduce a
+// bias.
+var _randomStringChars = 'abcdefghijklmnopqrstuvwxyz012345';
+module.exports = {
+  string: function(length) {
+    var max = _randomStringChars.length;
+    var bytes = crypto.randomBytes(length);
+    var ret = [];
+    for (var i = 0; i < length; i++) {
+      ret.push(_randomStringChars.substr(bytes[i] % max, 1));
+    }
+    return ret.join('');
+  }
+
+, number: function(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+, numberString: function(max) {
+    var t = ('' + (max - 1)).length;
+    var p = new Array(t + 1).join('0');
+    return (p + this.number(max)).slice(-t);
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/transport.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/transport.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:utils:transport');
+}
+
+module.exports = function(availableTransports) {
+  return {
+    filterToEnabled: function(transportsWhitelist, info) {
+      var transports = {
+        main: []
+      , facade: []
+      };
+      if (!transportsWhitelist) {
+        transportsWhitelist = [];
+      } else if (typeof transportsWhitelist === 'string') {
+        transportsWhitelist = [transportsWhitelist];
+      }
+
+      availableTransports.forEach(function(trans) {
+        if (!trans) {
+          return;
+        }
+
+        if (trans.transportName === 'websocket' && info.websocket === false) {
+          debug('disabled from server', 'websocket');
+          return;
+        }
+
+        if (transportsWhitelist.length &&
+            transportsWhitelist.indexOf(trans.transportName) === -1) {
+          debug('not in whitelist', trans.transportName);
+          return;
+        }
+
+        if (trans.enabled(info)) {
+          debug('enabled', trans.transportName);
+          transports.main.push(trans);
+          if (trans.facadeTransport) {
+            transports.facade.push(trans.facadeTransport);
+          }
+        } else {
+          debug('disabled', trans.transportName);
+        }
+      });
+      return transports;
+    }
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/utils/url.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/utils/url.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var URL = __webpack_require__(/*! url-parse */ "./node_modules/url-parse/index.js");
+
+var debug = function() {};
+if (true) {
+  debug = __webpack_require__(/*! debug */ "./node_modules/sockjs-client/node_modules/debug/src/browser.js")('sockjs-client:utils:url');
+}
+
+module.exports = {
+  getOrigin: function(url) {
+    if (!url) {
+      return null;
+    }
+
+    var p = new URL(url);
+    if (p.protocol === 'file:') {
+      return null;
+    }
+
+    var port = p.port;
+    if (!port) {
+      port = (p.protocol === 'https:') ? '443' : '80';
+    }
+
+    return p.protocol + '//' + p.hostname + ':' + port;
+  }
+
+, isOriginEqual: function(a, b) {
+    var res = this.getOrigin(a) === this.getOrigin(b);
+    debug('same', a, b, res);
+    return res;
+  }
+
+, isSchemeEqual: function(a, b) {
+    return (a.split(':')[0] === b.split(':')[0]);
+  }
+
+, addPath: function (url, path) {
+    var qs = url.split('?');
+    return qs[0] + path + (qs[1] ? '?' + qs[1] : '');
+  }
+
+, addQuery: function (url, q) {
+    return url + (url.indexOf('?') === -1 ? ('?' + q) : ('&' + q));
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/lib/version.js":
+/*!***************************************************!*\
+  !*** ./node_modules/sockjs-client/lib/version.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = '1.4.0';
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/node_modules/debug/src/browser.js":
+/*!**********************************************************************!*\
+  !*** ./node_modules/sockjs-client/node_modules/debug/src/browser.js ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+/* eslint-env browser */
+
+/**
+ * This is the web browser implementation of `debug()`.
+ */
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+exports.storage = localstorage();
+/**
+ * Colors.
+ */
+
+exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC', '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF', '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC', '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF', '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC', '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033', '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366', '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933', '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC', '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF', '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'];
+/**
+ * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+ * and the Firebug extension (any Firefox version) are known
+ * to support "%c" CSS customizations.
+ *
+ * TODO: add a `localStorage` variable to explicitly enable/disable colors
+ */
+// eslint-disable-next-line complexity
+
+function useColors() {
+  // NB: In an Electron preload script, document will be defined but not fully
+  // initialized. Since we know we're in Chrome, we'll just detect this case
+  // explicitly
+  if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
+    return true;
+  } // Internet Explorer and Edge do not support colors.
+
+
+  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+    return false;
+  } // Is webkit? http://stackoverflow.com/a/16459606/376773
+  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+
+
+  return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+  typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+  // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+}
+/**
+ * Colorize log arguments if enabled.
+ *
+ * @api public
+ */
+
+
+function formatArgs(args) {
+  args[0] = (this.useColors ? '%c' : '') + this.namespace + (this.useColors ? ' %c' : ' ') + args[0] + (this.useColors ? '%c ' : ' ') + '+' + module.exports.humanize(this.diff);
+
+  if (!this.useColors) {
+    return;
+  }
+
+  var c = 'color: ' + this.color;
+  args.splice(1, 0, c, 'color: inherit'); // The final "%c" is somewhat tricky, because there could be other
+  // arguments passed either before or after the %c, so we need to
+  // figure out the correct index to insert the CSS into
+
+  var index = 0;
+  var lastC = 0;
+  args[0].replace(/%[a-zA-Z%]/g, function (match) {
+    if (match === '%%') {
+      return;
+    }
+
+    index++;
+
+    if (match === '%c') {
+      // We only are interested in the *last* %c
+      // (the user may have provided their own)
+      lastC = index;
+    }
+  });
+  args.splice(lastC, 0, c);
+}
+/**
+ * Invokes `console.log()` when available.
+ * No-op when `console.log` is not a "function".
+ *
+ * @api public
+ */
+
+
+function log() {
+  var _console;
+
+  // This hackery is required for IE8/9, where
+  // the `console.log` function doesn't have 'apply'
+  return (typeof console === "undefined" ? "undefined" : _typeof(console)) === 'object' && console.log && (_console = console).log.apply(_console, arguments);
+}
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+
+
+function save(namespaces) {
+  try {
+    if (namespaces) {
+      exports.storage.setItem('debug', namespaces);
+    } else {
+      exports.storage.removeItem('debug');
+    }
+  } catch (error) {// Swallow
+    // XXX (@Qix-) should we be logging these?
+  }
+}
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+
+function load() {
+  var r;
+
+  try {
+    r = exports.storage.getItem('debug');
+  } catch (error) {} // Swallow
+  // XXX (@Qix-) should we be logging these?
+  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+
+
+  if (!r && typeof process !== 'undefined' && 'env' in process) {
+    r = process.env.DEBUG;
+  }
+
+  return r;
+}
+/**
+ * Localstorage attempts to return the localstorage.
+ *
+ * This is necessary because safari throws
+ * when a user disables cookies/localstorage
+ * and you attempt to access it.
+ *
+ * @return {LocalStorage}
+ * @api private
+ */
+
+
+function localstorage() {
+  try {
+    // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
+    // The Browser also has localStorage in the global context.
+    return localStorage;
+  } catch (error) {// Swallow
+    // XXX (@Qix-) should we be logging these?
+  }
+}
+
+module.exports = __webpack_require__(/*! ./common */ "./node_modules/sockjs-client/node_modules/debug/src/common.js")(exports);
+var formatters = module.exports.formatters;
+/**
+ * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+ */
+
+formatters.j = function (v) {
+  try {
+    return JSON.stringify(v);
+  } catch (error) {
+    return '[UnexpectedJSONParseError]: ' + error.message;
+  }
+};
+
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/node_modules/debug/src/common.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/sockjs-client/node_modules/debug/src/common.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * This is the common logic for both the Node.js and web browser
+ * implementations of `debug()`.
+ */
+function setup(env) {
+  createDebug.debug = createDebug;
+  createDebug.default = createDebug;
+  createDebug.coerce = coerce;
+  createDebug.disable = disable;
+  createDebug.enable = enable;
+  createDebug.enabled = enabled;
+  createDebug.humanize = __webpack_require__(/*! ms */ "./node_modules/sockjs-client/node_modules/ms/index.js");
+  Object.keys(env).forEach(function (key) {
+    createDebug[key] = env[key];
+  });
+  /**
+  * Active `debug` instances.
+  */
+
+  createDebug.instances = [];
+  /**
+  * The currently active debug mode names, and names to skip.
+  */
+
+  createDebug.names = [];
+  createDebug.skips = [];
+  /**
+  * Map of special "%n" handling functions, for the debug "format" argument.
+  *
+  * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
+  */
+
+  createDebug.formatters = {};
+  /**
+  * Selects a color for a debug namespace
+  * @param {String} namespace The namespace string for the for the debug instance to be colored
+  * @return {Number|String} An ANSI color code for the given namespace
+  * @api private
+  */
+
+  function selectColor(namespace) {
+    var hash = 0;
+
+    for (var i = 0; i < namespace.length; i++) {
+      hash = (hash << 5) - hash + namespace.charCodeAt(i);
+      hash |= 0; // Convert to 32bit integer
+    }
+
+    return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
+  }
+
+  createDebug.selectColor = selectColor;
+  /**
+  * Create a debugger with the given `namespace`.
+  *
+  * @param {String} namespace
+  * @return {Function}
+  * @api public
+  */
+
+  function createDebug(namespace) {
+    var prevTime;
+
+    function debug() {
+      // Disabled?
+      if (!debug.enabled) {
+        return;
+      }
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var self = debug; // Set `diff` timestamp
+
+      var curr = Number(new Date());
+      var ms = curr - (prevTime || curr);
+      self.diff = ms;
+      self.prev = prevTime;
+      self.curr = curr;
+      prevTime = curr;
+      args[0] = createDebug.coerce(args[0]);
+
+      if (typeof args[0] !== 'string') {
+        // Anything else let's inspect with %O
+        args.unshift('%O');
+      } // Apply any `formatters` transformations
+
+
+      var index = 0;
+      args[0] = args[0].replace(/%([a-zA-Z%])/g, function (match, format) {
+        // If we encounter an escaped % then don't increase the array index
+        if (match === '%%') {
+          return match;
+        }
+
+        index++;
+        var formatter = createDebug.formatters[format];
+
+        if (typeof formatter === 'function') {
+          var val = args[index];
+          match = formatter.call(self, val); // Now we need to remove `args[index]` since it's inlined in the `format`
+
+          args.splice(index, 1);
+          index--;
+        }
+
+        return match;
+      }); // Apply env-specific formatting (colors, etc.)
+
+      createDebug.formatArgs.call(self, args);
+      var logFn = self.log || createDebug.log;
+      logFn.apply(self, args);
+    }
+
+    debug.namespace = namespace;
+    debug.enabled = createDebug.enabled(namespace);
+    debug.useColors = createDebug.useColors();
+    debug.color = selectColor(namespace);
+    debug.destroy = destroy;
+    debug.extend = extend; // Debug.formatArgs = formatArgs;
+    // debug.rawLog = rawLog;
+    // env-specific initialization logic for debug instances
+
+    if (typeof createDebug.init === 'function') {
+      createDebug.init(debug);
+    }
+
+    createDebug.instances.push(debug);
+    return debug;
+  }
+
+  function destroy() {
+    var index = createDebug.instances.indexOf(this);
+
+    if (index !== -1) {
+      createDebug.instances.splice(index, 1);
+      return true;
+    }
+
+    return false;
+  }
+
+  function extend(namespace, delimiter) {
+    return createDebug(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
+  }
+  /**
+  * Enables a debug mode by namespaces. This can include modes
+  * separated by a colon and wildcards.
+  *
+  * @param {String} namespaces
+  * @api public
+  */
+
+
+  function enable(namespaces) {
+    createDebug.save(namespaces);
+    createDebug.names = [];
+    createDebug.skips = [];
+    var i;
+    var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+    var len = split.length;
+
+    for (i = 0; i < len; i++) {
+      if (!split[i]) {
+        // ignore empty strings
+        continue;
+      }
+
+      namespaces = split[i].replace(/\*/g, '.*?');
+
+      if (namespaces[0] === '-') {
+        createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+      } else {
+        createDebug.names.push(new RegExp('^' + namespaces + '$'));
+      }
+    }
+
+    for (i = 0; i < createDebug.instances.length; i++) {
+      var instance = createDebug.instances[i];
+      instance.enabled = createDebug.enabled(instance.namespace);
+    }
+  }
+  /**
+  * Disable debug output.
+  *
+  * @api public
+  */
+
+
+  function disable() {
+    createDebug.enable('');
+  }
+  /**
+  * Returns true if the given mode name is enabled, false otherwise.
+  *
+  * @param {String} name
+  * @return {Boolean}
+  * @api public
+  */
+
+
+  function enabled(name) {
+    if (name[name.length - 1] === '*') {
+      return true;
+    }
+
+    var i;
+    var len;
+
+    for (i = 0, len = createDebug.skips.length; i < len; i++) {
+      if (createDebug.skips[i].test(name)) {
+        return false;
+      }
+    }
+
+    for (i = 0, len = createDebug.names.length; i < len; i++) {
+      if (createDebug.names[i].test(name)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+  /**
+  * Coerce `val`.
+  *
+  * @param {Mixed} val
+  * @return {Mixed}
+  * @api private
+  */
+
+
+  function coerce(val) {
+    if (val instanceof Error) {
+      return val.stack || val.message;
+    }
+
+    return val;
+  }
+
+  createDebug.enable(createDebug.load());
+  return createDebug;
+}
+
+module.exports = setup;
+
+
+
+/***/ }),
+
+/***/ "./node_modules/sockjs-client/node_modules/ms/index.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/sockjs-client/node_modules/ms/index.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/**
+ * Helpers.
+ */
+
+var s = 1000;
+var m = s * 60;
+var h = m * 60;
+var d = h * 24;
+var w = d * 7;
+var y = d * 365.25;
+
+/**
+ * Parse or format the given `val`.
+ *
+ * Options:
+ *
+ *  - `long` verbose formatting [false]
+ *
+ * @param {String|Number} val
+ * @param {Object} [options]
+ * @throws {Error} throw an error if val is not a non-empty string or a number
+ * @return {String|Number}
+ * @api public
+ */
+
+module.exports = function(val, options) {
+  options = options || {};
+  var type = typeof val;
+  if (type === 'string' && val.length > 0) {
+    return parse(val);
+  } else if (type === 'number' && isFinite(val)) {
+    return options.long ? fmtLong(val) : fmtShort(val);
+  }
+  throw new Error(
+    'val is not a non-empty string or a valid number. val=' +
+      JSON.stringify(val)
+  );
+};
+
+/**
+ * Parse the given `str` and return milliseconds.
+ *
+ * @param {String} str
+ * @return {Number}
+ * @api private
+ */
+
+function parse(str) {
+  str = String(str);
+  if (str.length > 100) {
+    return;
+  }
+  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+    str
+  );
+  if (!match) {
+    return;
+  }
+  var n = parseFloat(match[1]);
+  var type = (match[2] || 'ms').toLowerCase();
+  switch (type) {
+    case 'years':
+    case 'year':
+    case 'yrs':
+    case 'yr':
+    case 'y':
+      return n * y;
+    case 'weeks':
+    case 'week':
+    case 'w':
+      return n * w;
+    case 'days':
+    case 'day':
+    case 'd':
+      return n * d;
+    case 'hours':
+    case 'hour':
+    case 'hrs':
+    case 'hr':
+    case 'h':
+      return n * h;
+    case 'minutes':
+    case 'minute':
+    case 'mins':
+    case 'min':
+    case 'm':
+      return n * m;
+    case 'seconds':
+    case 'second':
+    case 'secs':
+    case 'sec':
+    case 's':
+      return n * s;
+    case 'milliseconds':
+    case 'millisecond':
+    case 'msecs':
+    case 'msec':
+    case 'ms':
+      return n;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Short format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function fmtShort(ms) {
+  var msAbs = Math.abs(ms);
+  if (msAbs >= d) {
+    return Math.round(ms / d) + 'd';
+  }
+  if (msAbs >= h) {
+    return Math.round(ms / h) + 'h';
+  }
+  if (msAbs >= m) {
+    return Math.round(ms / m) + 'm';
+  }
+  if (msAbs >= s) {
+    return Math.round(ms / s) + 's';
+  }
+  return ms + 'ms';
+}
+
+/**
+ * Long format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function fmtLong(ms) {
+  var msAbs = Math.abs(ms);
+  if (msAbs >= d) {
+    return plural(ms, msAbs, d, 'day');
+  }
+  if (msAbs >= h) {
+    return plural(ms, msAbs, h, 'hour');
+  }
+  if (msAbs >= m) {
+    return plural(ms, msAbs, m, 'minute');
+  }
+  if (msAbs >= s) {
+    return plural(ms, msAbs, s, 'second');
+  }
+  return ms + ' ms';
+}
+
+/**
+ * Pluralization helper.
+ */
+
+function plural(ms, msAbs, n, name) {
+  var isPlural = msAbs >= n * 1.5;
+  return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
+}
+
 
 /***/ }),
 
@@ -41472,6 +50307,469 @@ exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
 exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/url-parse/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/url-parse/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var required = __webpack_require__(/*! requires-port */ "./node_modules/requires-port/index.js")
+  , qs = __webpack_require__(/*! querystringify */ "./node_modules/querystringify/index.js")
+  , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
+  , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
+  , whitespace = '[\\x09\\x0A\\x0B\\x0C\\x0D\\x20\\xA0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u202F\\u205F\\u3000\\u2028\\u2029\\uFEFF]'
+  , left = new RegExp('^'+ whitespace +'+');
+
+/**
+ * Trim a given string.
+ *
+ * @param {String} str String to trim.
+ * @public
+ */
+function trimLeft(str) {
+  return (str ? str : '').toString().replace(left, '');
+}
+
+/**
+ * These are the parse rules for the URL parser, it informs the parser
+ * about:
+ *
+ * 0. The char it Needs to parse, if it's a string it should be done using
+ *    indexOf, RegExp using exec and NaN means set as current value.
+ * 1. The property we should set when parsing this value.
+ * 2. Indication if it's backwards or forward parsing, when set as number it's
+ *    the value of extra chars that should be split off.
+ * 3. Inherit from location if non existing in the parser.
+ * 4. `toLowerCase` the resulting value.
+ */
+var rules = [
+  ['#', 'hash'],                        // Extract from the back.
+  ['?', 'query'],                       // Extract from the back.
+  function sanitize(address) {          // Sanitize what is left of the address
+    return address.replace('\\', '/');
+  },
+  ['/', 'pathname'],                    // Extract from the back.
+  ['@', 'auth', 1],                     // Extract from the front.
+  [NaN, 'host', undefined, 1, 1],       // Set left over value.
+  [/:(\d+)$/, 'port', undefined, 1],    // RegExp the back.
+  [NaN, 'hostname', undefined, 1, 1]    // Set left over.
+];
+
+/**
+ * These properties should not be copied or inherited from. This is only needed
+ * for all non blob URL's as a blob URL does not include a hash, only the
+ * origin.
+ *
+ * @type {Object}
+ * @private
+ */
+var ignore = { hash: 1, query: 1 };
+
+/**
+ * The location object differs when your code is loaded through a normal page,
+ * Worker or through a worker using a blob. And with the blobble begins the
+ * trouble as the location object will contain the URL of the blob, not the
+ * location of the page where our code is loaded in. The actual origin is
+ * encoded in the `pathname` so we can thankfully generate a good "default"
+ * location from it so we can generate proper relative URL's again.
+ *
+ * @param {Object|String} loc Optional default location object.
+ * @returns {Object} lolcation object.
+ * @public
+ */
+function lolcation(loc) {
+  var globalVar;
+
+  if (typeof window !== 'undefined') globalVar = window;
+  else if (typeof global !== 'undefined') globalVar = global;
+  else if (typeof self !== 'undefined') globalVar = self;
+  else globalVar = {};
+
+  var location = globalVar.location || {};
+  loc = loc || location;
+
+  var finaldestination = {}
+    , type = typeof loc
+    , key;
+
+  if ('blob:' === loc.protocol) {
+    finaldestination = new Url(unescape(loc.pathname), {});
+  } else if ('string' === type) {
+    finaldestination = new Url(loc, {});
+    for (key in ignore) delete finaldestination[key];
+  } else if ('object' === type) {
+    for (key in loc) {
+      if (key in ignore) continue;
+      finaldestination[key] = loc[key];
+    }
+
+    if (finaldestination.slashes === undefined) {
+      finaldestination.slashes = slashes.test(loc.href);
+    }
+  }
+
+  return finaldestination;
+}
+
+/**
+ * @typedef ProtocolExtract
+ * @type Object
+ * @property {String} protocol Protocol matched in the URL, in lowercase.
+ * @property {Boolean} slashes `true` if protocol is followed by "//", else `false`.
+ * @property {String} rest Rest of the URL that is not part of the protocol.
+ */
+
+/**
+ * Extract protocol information from a URL with/without double slash ("//").
+ *
+ * @param {String} address URL we want to extract from.
+ * @return {ProtocolExtract} Extracted information.
+ * @private
+ */
+function extractProtocol(address) {
+  address = trimLeft(address);
+  var match = protocolre.exec(address);
+
+  return {
+    protocol: match[1] ? match[1].toLowerCase() : '',
+    slashes: !!match[2],
+    rest: match[3]
+  };
+}
+
+/**
+ * Resolve a relative URL pathname against a base URL pathname.
+ *
+ * @param {String} relative Pathname of the relative URL.
+ * @param {String} base Pathname of the base URL.
+ * @return {String} Resolved pathname.
+ * @private
+ */
+function resolve(relative, base) {
+  if (relative === '') return base;
+
+  var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/'))
+    , i = path.length
+    , last = path[i - 1]
+    , unshift = false
+    , up = 0;
+
+  while (i--) {
+    if (path[i] === '.') {
+      path.splice(i, 1);
+    } else if (path[i] === '..') {
+      path.splice(i, 1);
+      up++;
+    } else if (up) {
+      if (i === 0) unshift = true;
+      path.splice(i, 1);
+      up--;
+    }
+  }
+
+  if (unshift) path.unshift('');
+  if (last === '.' || last === '..') path.push('');
+
+  return path.join('/');
+}
+
+/**
+ * The actual URL instance. Instead of returning an object we've opted-in to
+ * create an actual constructor as it's much more memory efficient and
+ * faster and it pleases my OCD.
+ *
+ * It is worth noting that we should not use `URL` as class name to prevent
+ * clashes with the global URL instance that got introduced in browsers.
+ *
+ * @constructor
+ * @param {String} address URL we want to parse.
+ * @param {Object|String} [location] Location defaults for relative paths.
+ * @param {Boolean|Function} [parser] Parser for the query string.
+ * @private
+ */
+function Url(address, location, parser) {
+  address = trimLeft(address);
+
+  if (!(this instanceof Url)) {
+    return new Url(address, location, parser);
+  }
+
+  var relative, extracted, parse, instruction, index, key
+    , instructions = rules.slice()
+    , type = typeof location
+    , url = this
+    , i = 0;
+
+  //
+  // The following if statements allows this module two have compatibility with
+  // 2 different API:
+  //
+  // 1. Node.js's `url.parse` api which accepts a URL, boolean as arguments
+  //    where the boolean indicates that the query string should also be parsed.
+  //
+  // 2. The `URL` interface of the browser which accepts a URL, object as
+  //    arguments. The supplied object will be used as default values / fall-back
+  //    for relative paths.
+  //
+  if ('object' !== type && 'string' !== type) {
+    parser = location;
+    location = null;
+  }
+
+  if (parser && 'function' !== typeof parser) parser = qs.parse;
+
+  location = lolcation(location);
+
+  //
+  // Extract protocol information before running the instructions.
+  //
+  extracted = extractProtocol(address || '');
+  relative = !extracted.protocol && !extracted.slashes;
+  url.slashes = extracted.slashes || relative && location.slashes;
+  url.protocol = extracted.protocol || location.protocol || '';
+  address = extracted.rest;
+
+  //
+  // When the authority component is absent the URL starts with a path
+  // component.
+  //
+  if (!extracted.slashes) instructions[3] = [/(.*)/, 'pathname'];
+
+  for (; i < instructions.length; i++) {
+    instruction = instructions[i];
+
+    if (typeof instruction === 'function') {
+      address = instruction(address);
+      continue;
+    }
+
+    parse = instruction[0];
+    key = instruction[1];
+
+    if (parse !== parse) {
+      url[key] = address;
+    } else if ('string' === typeof parse) {
+      if (~(index = address.indexOf(parse))) {
+        if ('number' === typeof instruction[2]) {
+          url[key] = address.slice(0, index);
+          address = address.slice(index + instruction[2]);
+        } else {
+          url[key] = address.slice(index);
+          address = address.slice(0, index);
+        }
+      }
+    } else if ((index = parse.exec(address))) {
+      url[key] = index[1];
+      address = address.slice(0, index.index);
+    }
+
+    url[key] = url[key] || (
+      relative && instruction[3] ? location[key] || '' : ''
+    );
+
+    //
+    // Hostname, host and protocol should be lowercased so they can be used to
+    // create a proper `origin`.
+    //
+    if (instruction[4]) url[key] = url[key].toLowerCase();
+  }
+
+  //
+  // Also parse the supplied query string in to an object. If we're supplied
+  // with a custom parser as function use that instead of the default build-in
+  // parser.
+  //
+  if (parser) url.query = parser(url.query);
+
+  //
+  // If the URL is relative, resolve the pathname against the base URL.
+  //
+  if (
+      relative
+    && location.slashes
+    && url.pathname.charAt(0) !== '/'
+    && (url.pathname !== '' || location.pathname !== '')
+  ) {
+    url.pathname = resolve(url.pathname, location.pathname);
+  }
+
+  //
+  // We should not add port numbers if they are already the default port number
+  // for a given protocol. As the host also contains the port number we're going
+  // override it with the hostname which contains no port number.
+  //
+  if (!required(url.port, url.protocol)) {
+    url.host = url.hostname;
+    url.port = '';
+  }
+
+  //
+  // Parse down the `auth` for the username and password.
+  //
+  url.username = url.password = '';
+  if (url.auth) {
+    instruction = url.auth.split(':');
+    url.username = instruction[0] || '';
+    url.password = instruction[1] || '';
+  }
+
+  url.origin = url.protocol && url.host && url.protocol !== 'file:'
+    ? url.protocol +'//'+ url.host
+    : 'null';
+
+  //
+  // The href is just the compiled result.
+  //
+  url.href = url.toString();
+}
+
+/**
+ * This is convenience method for changing properties in the URL instance to
+ * insure that they all propagate correctly.
+ *
+ * @param {String} part          Property we need to adjust.
+ * @param {Mixed} value          The newly assigned value.
+ * @param {Boolean|Function} fn  When setting the query, it will be the function
+ *                               used to parse the query.
+ *                               When setting the protocol, double slash will be
+ *                               removed from the final url if it is true.
+ * @returns {URL} URL instance for chaining.
+ * @public
+ */
+function set(part, value, fn) {
+  var url = this;
+
+  switch (part) {
+    case 'query':
+      if ('string' === typeof value && value.length) {
+        value = (fn || qs.parse)(value);
+      }
+
+      url[part] = value;
+      break;
+
+    case 'port':
+      url[part] = value;
+
+      if (!required(value, url.protocol)) {
+        url.host = url.hostname;
+        url[part] = '';
+      } else if (value) {
+        url.host = url.hostname +':'+ value;
+      }
+
+      break;
+
+    case 'hostname':
+      url[part] = value;
+
+      if (url.port) value += ':'+ url.port;
+      url.host = value;
+      break;
+
+    case 'host':
+      url[part] = value;
+
+      if (/:\d+$/.test(value)) {
+        value = value.split(':');
+        url.port = value.pop();
+        url.hostname = value.join(':');
+      } else {
+        url.hostname = value;
+        url.port = '';
+      }
+
+      break;
+
+    case 'protocol':
+      url.protocol = value.toLowerCase();
+      url.slashes = !fn;
+      break;
+
+    case 'pathname':
+    case 'hash':
+      if (value) {
+        var char = part === 'pathname' ? '/' : '#';
+        url[part] = value.charAt(0) !== char ? char + value : value;
+      } else {
+        url[part] = value;
+      }
+      break;
+
+    default:
+      url[part] = value;
+  }
+
+  for (var i = 0; i < rules.length; i++) {
+    var ins = rules[i];
+
+    if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
+  }
+
+  url.origin = url.protocol && url.host && url.protocol !== 'file:'
+    ? url.protocol +'//'+ url.host
+    : 'null';
+
+  url.href = url.toString();
+
+  return url;
+}
+
+/**
+ * Transform the properties back in to a valid and full URL string.
+ *
+ * @param {Function} stringify Optional query stringify function.
+ * @returns {String} Compiled version of the URL.
+ * @public
+ */
+function toString(stringify) {
+  if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
+
+  var query
+    , url = this
+    , protocol = url.protocol;
+
+  if (protocol && protocol.charAt(protocol.length - 1) !== ':') protocol += ':';
+
+  var result = protocol + (url.slashes ? '//' : '');
+
+  if (url.username) {
+    result += url.username;
+    if (url.password) result += ':'+ url.password;
+    result += '@';
+  }
+
+  result += url.host + url.pathname;
+
+  query = 'object' === typeof url.query ? stringify(url.query) : url.query;
+  if (query) result += '?' !== query.charAt(0) ? '?'+ query : query;
+
+  if (url.hash) result += url.hash;
+
+  return result;
+}
+
+Url.prototype = { set: set, toString: toString };
+
+//
+// Expose the URL parser and some additional properties that might be useful for
+// others or testing.
+//
+Url.extractProtocol = extractProtocol;
+Url.location = lolcation;
+Url.trimLeft = trimLeft;
+Url.qs = qs;
+
+module.exports = Url;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
@@ -96120,6 +105418,20 @@ var index_esm = {
 
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./node_modules/webpack/buildin/amd-options.js":
+/*!****************************************!*\
+  !*** (webpack)/buildin/amd-options.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(this, {}))
 
 /***/ }),
 

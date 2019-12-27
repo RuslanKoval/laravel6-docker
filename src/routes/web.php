@@ -42,9 +42,12 @@ Route::group(['prefix' => 'queue'], function () {
     Route::get('/', 'QueueController@queue')->name('queue');
 });
 
-
 Route::get('/di', 'TestDI\DiController@store')->name('di');
 
 Route::get('/rbac', 'RbacTestController@index')->name('rbac-test');
 
 Route::get('/file-storage', 'FileStorageController@index')->name('file-storage');
+
+Route::group(['namespace' => 'Centrifugo', 'prefix' => 'centrifugo'], function () {
+    Route::post('token', 'CentrifugoController@token')->name('centrifugo-token');
+});
